@@ -25,7 +25,7 @@ from pathlib import Path
 import numpy as np
 
 from market.config import MarketConfig
-from market.equilibrium import compute_equilibrium
+from market.equilibrium import compute_equilibrium, demand_supply
 
 
 def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], orders: list[dict],
@@ -45,6 +45,12 @@ def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], o
         per_period.append({"period": p, "efficiency": p_eff, "price_rmsd": p_rmsd, "n_trades": len(pt),
                            "eq_quantity": e.quantity, "eq_price": e.price_mid,
                            "smith_alpha": 100 * p_rmsd / e.price_mid if e.price_mid and pt else float("nan")})
+    # Surplus split: what share of realized surplus went to buyers, vs. the share they'd get at the CE price.
+    buyer_surplus = sum(t["buyer_value"] - t["price"] for t in trades)
+    ce_buyer = 0.0
+    for p, e in enumerate(eqs):
+        d, _ = demand_supply(cfg.for_period(p))
+        ce_buyer += sum(v - e.price_mid for v in d[:e.quantity])
     submitted = [o for o in orders if o["action"] != "pass" and o.get("raw_price") is not None]
     return {
         "efficiency": realized / max_surplus if max_surplus else float("nan"),
@@ -54,6 +60,8 @@ def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], o
         "quantity_ratio": len(trades) / sum(e.quantity for e in eqs) if eqs else float("nan"),
         "extramarginal": extramarginal,
         "n_trades": len(trades),
+        "buyer_share": buyer_surplus / realized if realized else float("nan"),
+        "buyer_share_ce": ce_buyer / max_surplus if max_surplus else float("nan"),
         "clip_rate": (sum(o["clipped"] for o in submitted) / len(submitted)) if submitted else 0.0,
         "pass_rate": (sum(o["action"] == "pass" for o in orders) / len(orders)) if orders else 0.0,
         "error_rate": (sum(bool(o.get("error")) for o in orders) / len(orders)) if orders else 0.0,
@@ -72,20 +80,24 @@ def _rms(xs) -> float:
 
 # ---------------------------------------------------------------------------
 SUMMARY_KEYS = ["efficiency", "price_rmsd", "smith_alpha_last", "price_in_band", "quantity_ratio",
+                "buyer_share", "buyer_share_ce",
                 "extramarginal", "clip_rate", "error_rate", "invalid_belief_rate", "llm_calls", "llm_cost_usd"]
 
 
-def load_all(results_dir: str | Path) -> dict[str, list[dict]]:
+def load_all(results_dir: str | Path, include_mock: bool = False) -> dict[str, list[dict]]:
+    """Load every run's metrics. Mock-backend runs are excluded unless asked for: they are not findings."""
     runs = defaultdict(list)
     for f in sorted(Path(results_dir).glob("*/seed_*/metrics.json")):
         m = json.loads(f.read_text())
+        if m.get("backend") == "mock" and not include_mock:
+            continue
         runs[m["experiment"]].append(m)
     return dict(runs)
 
 
-def summarize(results_dir: str | Path) -> list[dict]:
+def summarize(results_dir: str | Path, include_mock: bool = False) -> list[dict]:
     rows = []
-    for name, runs in load_all(results_dir).items():
+    for name, runs in load_all(results_dir, include_mock).items():
         row = {"experiment": name, "n_seeds": len(runs)}
         for k in SUMMARY_KEYS:
             vals = np.array([r[k] for r in runs if r.get(k) is not None and not _isnan(r[k])], dtype=float)
@@ -100,8 +112,9 @@ def _isnan(x) -> bool:
 
 
 def main():
-    results_dir = Path(sys.argv[1] if len(sys.argv) > 1 else "results")
-    rows = summarize(results_dir)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    results_dir = Path(args[0] if args else "results")
+    rows = summarize(results_dir, include_mock="--include-mock" in sys.argv)
     if not rows:
         print(f"no runs found under {results_dir}")
         return

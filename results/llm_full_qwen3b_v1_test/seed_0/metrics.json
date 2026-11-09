@@ -6,6 +6,8 @@
  "quantity_ratio": 1.0909090909090908,
  "extramarginal": 3,
  "n_trades": 12,
+ "buyer_share": 0.786637168141593,
+ "buyer_share_ce": 0.48333333333333334,
  "clip_rate": 0.19148936170212766,
  "pass_rate": 0.37333333333333335,
  "error_rate": 0.22666666666666666,

@@ -29,3 +29,7 @@
   Agents coordinate on *a* price, not the competitive one: high efficiency, biased split of surplus (buyers gain).
   Budget-violation rate unchanged (~22%). Wall time 236 min (~52 s/call) despite 11 s/call in probes; likely the
   laptop slept or throttled overnight. Timing on this laptop is unreliable.
+- 2026-11-09: New metric buyer_share (share of realized surplus going to buyers) vs buyer_share_ce (share at P*).
+  CE share 0.483. ZI-C r6 0.508, v0 0.520, v1 0.621: the coordinated v1 market settles below P* and shifts ~14 points
+  of surplus to buyers. Efficiency went up, but the split became less competitive.
+- 2026-11-09: Summaries/plots now exclude mock runs by default (--include-mock to show them).
