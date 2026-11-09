@@ -22,18 +22,30 @@ RESULTS = ROOT / "results"
 st.set_page_config(page_title="Market Sim Replay", layout="wide")
 st.title("Multi-agent market simulation: replay")
 
-exps = sorted(p.name for p in RESULTS.iterdir() if p.is_dir()) if RESULTS.exists() else []
-if not exps:
-    st.info("No results yet. Run `python -m experiments.runner --all experiments/configs --backend mock` first.")
+def real_seeds(exp_dir: Path) -> list[str]:
+    """Seeds of an experiment that were not produced by the mock backend (mock runs are not results)."""
+    out = []
+    for p in sorted(exp_dir.iterdir()):
+        f = p / "metrics.json"
+        if p.is_dir() and f.exists() and json.loads(f.read_text()).get("backend") != "mock":
+            out.append(p.name)
+    return out
+
+
+runs_by_exp = {p.name: real_seeds(p) for p in sorted(RESULTS.iterdir()) if p.is_dir()} if RESULTS.exists() else {}
+runs_by_exp = {k: v for k, v in runs_by_exp.items() if v}
+if not runs_by_exp:
+    st.info("No real results yet. Run an experiment with `--backend ollama` or `--backend anthropic` first.")
     st.stop()
 
 tab_replay, tab_compare = st.tabs(["Replay a run", "Compare conditions"])
 
 with tab_replay:
     c1, c2 = st.columns(2)
-    exp = c1.selectbox("Experiment", exps)
-    seeds = sorted(p.name for p in (RESULTS / exp).iterdir() if p.is_dir())
-    seed = c2.selectbox("Seed", seeds)
+    names = list(runs_by_exp)
+    default = names.index("llm_full_qwen3b_v1") if "llm_full_qwen3b_v1" in names else 0
+    exp = c1.selectbox("Experiment", names, index=default)
+    seed = c2.selectbox("Seed", runs_by_exp[exp])
     run = RESULTS / exp / seed
     cfg = load_market_json(run / "market.json")
     trades = [json.loads(l) for l in open(run / "trades.jsonl")]
@@ -41,11 +53,17 @@ with tab_replay:
     msgs = [json.loads(l) for l in open(run / "messages.jsonl")]
     metrics = json.loads((run / "metrics.json").read_text())
 
-    m1, m2, m3, m4 = st.columns(4)
+    run_cfg = __import__("yaml").safe_load(open(run / "config.yaml"))
+    model = run_cfg.get("llm", {}).get("model", "-") if metrics.get("backend") not in (None, "none") else "no LLM"
+    st.caption(f"Backend: {metrics.get('backend')} · model: {model} · market: {cfg.name} · "
+               f"{run_cfg.get('session', {}).get('rounds_per_period', 10)} rounds per period")
+    m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Efficiency", f"{metrics['efficiency']:.3f}")
     m2.metric("Price RMSD", f"{metrics['price_rmsd']:.2f}")
     m3.metric("Trades", metrics["n_trades"])
-    m4.metric("LLM cost", f"${metrics['llm_cost_usd']:.3f}")
+    m4.metric("Buyers' share", f"{metrics.get('buyer_share', float('nan')):.2f}",
+              help=f"Share at the competitive price: {metrics.get('buyer_share_ce', float('nan')):.2f}")
+    m5.metric("LLM calls", metrics.get("llm_calls", 0))
 
     n_steps = max(1, len(trades))
     step = st.slider("Replay up to trade #", 1, n_steps, n_steps)
