@@ -1,0 +1,7 @@
+name: rob_shock_llm
+market: market/configs/shock.yaml
+seeds: [0,1,2,3,4]
+session: {n_periods: 3, rounds_per_period: 10, enforce_budget: true}
+traders: {type: llm, personas: neutral, memory: true, chat: false}
+analyst: {enabled: true, mode: rule}
+llm: {backend: anthropic, model: claude-opus-5-5, effort: low}

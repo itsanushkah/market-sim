@@ -1,0 +1,5 @@
+name: baseline_oracle
+market: market/configs/symmetric.yaml
+seeds: [0]
+session: {n_periods: 3, rounds_per_period: 10, enforce_budget: true}
+centralized: {planner: oracle}
