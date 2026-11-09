@@ -1,0 +1,72 @@
+[
+ {
+  "period": 0,
+  "round": 0,
+  "estimate": 76.45,
+  "spread": 73.75,
+  "n_beliefs": 10
+ },
+ {
+  "period": 0,
+  "round": 1,
+  "estimate": 85.87,
+  "spread": 41.775000000000006,
+  "n_beliefs": 7
+ },
+ {
+  "period": 0,
+  "round": 2,
+  "estimate": 85.35,
+  "spread": 16.299999999999997,
+  "n_beliefs": 8
+ },
+ {
+  "period": 0,
+  "round": 3,
+  "estimate": 100.17,
+  "spread": 32.0,
+  "n_beliefs": 8
+ },
+ {
+  "period": 0,
+  "round": 4,
+  "estimate": 102.6,
+  "spread": 12.25,
+  "n_beliefs": 7
+ },
+ {
+  "period": 0,
+  "round": 5,
+  "estimate": 98.0,
+  "spread": 5.0,
+  "n_beliefs": 3
+ },
+ {
+  "period": 0,
+  "round": 6,
+  "estimate": 101.0,
+  "spread": 7.0,
+  "n_beliefs": 5
+ },
+ {
+  "period": 0,
+  "round": 7,
+  "estimate": 97.8,
+  "spread": 10.75,
+  "n_beliefs": 4
+ },
+ {
+  "period": 0,
+  "round": 8,
+  "estimate": 101.0,
+  "spread": 1.5999999999999943,
+  "n_beliefs": 3
+ },
+ {
+  "period": 0,
+  "round": 9,
+  "estimate": 98.6,
+  "spread": 1.4000000000000057,
+  "n_beliefs": 3
+ }
+]

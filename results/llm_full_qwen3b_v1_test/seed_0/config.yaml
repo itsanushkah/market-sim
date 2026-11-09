@@ -1,0 +1,26 @@
+name: llm_full_qwen3b_v1_test
+market: market/configs/symmetric.yaml
+seeds:
+- 0
+- 1
+- 2
+- 3
+- 4
+session:
+  n_periods: 1
+  rounds_per_period: 10
+  enforce_budget: true
+  max_workers: 1
+traders:
+  type: llm
+  personas: neutral
+  memory: true
+  chat: false
+analyst:
+  enabled: true
+  mode: rule
+llm:
+  backend: ollama
+  model: qwen2.5:3b
+  effort: low
+seed: 0

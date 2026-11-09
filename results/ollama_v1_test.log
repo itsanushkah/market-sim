@@ -1,0 +1,2 @@
+  period 1/1: 12 trades, prices [50.5, 41.0, 80.0, 76.5, 100.0, 85.0, 100.0, 120.0, 85.1, 106.5, 95.0, 101.0]
+llm_full_qwen3b_v1_test      seed=0  eff=0.942  rmsd=25.50  trades=12  cost=$0.000
