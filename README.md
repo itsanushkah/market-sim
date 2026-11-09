@@ -51,7 +51,7 @@ CMPSC 448 final project. All results so far come from a free local model (qwen2.
 git clone https://github.com/itsanushkah/market-sim.git && cd market-sim
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-pytest                                   # 19 tests, no model needed
+pytest                                   # 24 tests, no model needed
 ```
 
 Pick an LLM backend with `--backend`:

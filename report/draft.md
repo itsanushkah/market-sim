@@ -87,7 +87,7 @@ agent order, and a free mock backend used only for tests.
 ### 2.6 Implementation details
 
 - Python 3.11, about 2,000 lines across `market/`, `agents/`, `comms/`, `llm/`, `experiments/`, `analysis/`,
-  `dashboard/` and `tests/`. 19 unit and end-to-end tests run on the mock backend.
+  `dashboard/` and `tests/`. 24 unit and end-to-end tests (market, agents, runner, analysis pipeline) run without a model.
 - LLM backends: local open-weight model through Ollama (qwen2.5:3b, used for all reported results because of
   budget), the Claude API (implemented, not used for results) and the mock backend.
 - Each run writes its config, market, every order (with the agent's reasoning), trades, bus messages, analyst
