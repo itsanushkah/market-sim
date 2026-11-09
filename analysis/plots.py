@@ -8,6 +8,10 @@ Produces:
   efficiency_by_condition.png       mean efficiency ± 95% CI for every experiment
   rmsd_by_condition.png             mean price RMSD ± 95% CI
   cost_vs_efficiency.png            LLM $ cost vs efficiency (efficiency of collaboration)
+  efficiency_by_period.png          mean efficiency per period for each condition (learning across periods)
+  surplus_split.png                 buyers' share of surplus vs the competitive-equilibrium share
+  prompt_fix_before_after.png       v0 vs v1 prompts: price paths and per-period efficiency
+Mock-backend runs are skipped.
 """
 from __future__ import annotations
 
@@ -19,7 +23,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from analysis.metrics import summarize
+from analysis.metrics import load_all, summarize
 from market.config import MarketConfig, TraderSpec
 from market.equilibrium import compute_equilibrium, demand_supply
 
@@ -98,6 +102,74 @@ def plot_cost_vs_eff(rows: list[dict], out: Path) -> None:
     fig.tight_layout(); fig.savefig(out); plt.close(fig)
 
 
+def plot_efficiency_by_period(results_dir: Path, out: Path, suffix: str = "_r6") -> None:
+    """Only runs with the same session length (name ends with `suffix`) are comparable on one chart."""
+    runs = {k: v for k, v in load_all(results_dir).items()
+            if k.endswith(suffix) and "oracle" not in k and "shock" not in k}
+    if not runs:
+        return
+    fig, ax = plt.subplots(figsize=(5.5, 3.4))
+    palette = iter(["#2a6fdb", "#e07b39", "#3a9a5b", "#9b59b6", "#c0392b", "#16a085"])
+    for name, rs in sorted(runs.items(), key=lambda kv: kv[0].startswith("baseline")):
+        n = min(len(r["per_period"]) for r in rs)
+        ys = [sum(r["per_period"][p]["efficiency"] for r in rs) / len(rs) for p in range(n)]
+        baseline = name.startswith("baseline")
+        ax.plot(range(1, n + 1), ys, marker="o", ms=3, ls="--" if baseline else "-",
+                color=C_BASE if baseline else next(palette), label=f"{name.removesuffix(suffix)} (n={len(rs)})")
+    ax.set(xlabel="period", ylabel="allocative efficiency", ylim=(0, 1.05),
+           title="Efficiency by period (6 rounds/period, symmetric market)")
+    ax.set_xticks([1, 2, 3])
+    ax.legend(frameon=False, fontsize=7, loc="lower left")
+    fig.tight_layout(); fig.savefig(out); plt.close(fig)
+
+
+def plot_surplus_split(rows: list[dict], out: Path) -> None:
+    rows = sorted((r for r in rows if not r["experiment"].endswith("_test")), key=lambda r: r["experiment"])
+    if not rows:
+        return
+    names = [r["experiment"] for r in rows]
+    fig, ax = plt.subplots(figsize=(max(5, 0.55 * len(rows)), 3.4))
+    ax.bar(names, [r["buyer_share"] for r in rows], yerr=[r["buyer_share_ci95"] for r in rows],
+           color=C_MAIN, capsize=3, label="realized buyer share")
+    ax.scatter(names, [r["buyer_share_ce"] for r in rows], marker="_", s=400, color="black", zorder=3,
+               label="share at competitive price")
+    ax.set_ylabel("buyers' share of surplus")
+    ax.tick_params(axis="x", rotation=60)
+    plt.setp(ax.get_xticklabels(), ha="right")
+    ax.legend(frameon=False, fontsize=7)
+    fig.tight_layout(); fig.savefig(out); plt.close(fig)
+
+
+def plot_before_after(results_dir: Path, before: str, after: str, out: Path, seed: int = 0) -> None:
+    runs = {k: results_dir / k / f"seed_{seed}" for k in (before, after)}
+    if not all((r / "metrics.json").exists() for r in runs.values()):
+        return
+    fig, axes = plt.subplots(1, 3, figsize=(10, 3.0), gridspec_kw={"width_ratios": [2, 2, 1.2]})
+    for ax, (label, run) in zip(axes[:2], runs.items()):
+        cfg = load_market_json(run / "market.json")
+        trades = [json.loads(l) for l in open(run / "trades.jsonl")]
+        m = json.loads((run / "metrics.json").read_text())
+        e = compute_equilibrium(cfg)
+        ax.axhline(e.price_mid, color="black", lw=0.8, ls="--")
+        x0 = 0
+        for p in range(len(m["per_period"])):
+            pt = [t["price"] for t in trades if t["period"] == p]
+            ax.plot(range(x0, x0 + len(pt)), pt, "o-", ms=2.5, lw=0.9, color=C_MAIN)
+            x0 += len(pt)
+            ax.axvline(x0 - 0.5, color=C_BASE, lw=0.5, ls=":")
+        ax.set(title=f"{label}: efficiency {m['efficiency']:.2f}", xlabel="trade #", ylabel="price")
+    ax = axes[2]
+    w = 0.38
+    for i, (label, run) in enumerate(runs.items()):
+        m = json.loads((run / "metrics.json").read_text())
+        ys = [p["efficiency"] for p in m["per_period"]]
+        ax.bar([x + (i - 0.5) * w for x in range(1, len(ys) + 1)], ys, w,
+               color=[C_BASE, C_MAIN][i], label=label.split("_")[-1])
+    ax.set(xlabel="period", ylabel="efficiency", ylim=(0, 1.05), title="per period")
+    ax.set_xticks([1, 2, 3]); ax.legend(frameon=False, fontsize=7)
+    fig.tight_layout(); fig.savefig(out); plt.close(fig)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default="results")
@@ -112,6 +184,8 @@ def main():
         run = exp_dir / f"seed_{args.seed}"
         if not (run / "metrics.json").exists():
             continue
+        if json.loads((run / "metrics.json").read_text()).get("backend") == "mock":
+            continue
         cfg = load_market_json(run / "market.json")
         if cfg.name not in seen_markets:
             plot_supply_demand(cfg, out / f"supply_demand_{cfg.name}.png"); seen_markets.add(cfg.name)
@@ -123,6 +197,9 @@ def main():
         plot_bars(rows, "efficiency", "allocative efficiency", out / "efficiency_by_condition.png", ref=1.0)
         plot_bars(rows, "price_rmsd", "price RMSD from P*", out / "rmsd_by_condition.png")
         plot_cost_vs_eff(rows, out / "cost_vs_efficiency.png")
+        plot_surplus_split(rows, out / "surplus_split.png")
+    plot_efficiency_by_period(res, out / "efficiency_by_period.png")
+    plot_before_after(res, "llm_full_qwen3b_v0", "llm_full_qwen3b_v1", out / "prompt_fix_before_after.png")
     print(f"figures written to {out}/")
 
 
