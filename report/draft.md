@@ -128,8 +128,9 @@ truth.
 
 - **ZI-C / ZI-U**: random traders with and without the budget constraint.
 - **Oracle**: the exact equilibrium price (upper bound).
-- **Centralized LLM**: one model sees all private information and sets one clearing price (implemented; not
-  run, because it needs the same model for a fair comparison) **[TBD: run or drop]**.
+- **Centralized LLM**: the same model (qwen2.5:3b) sees every trader's private values and costs and sets one
+  clearing price per period; all units that want to trade at that price trade. 5 seeds, response cache off, so
+  each seed is an independent sample.
 - **Ablations** of the coordination mechanisms: `no_analyst` (no consensus broadcast), `no_comms` (no analyst,
   no memory, no chat; agents interact only through the order book).
 
@@ -143,6 +144,7 @@ at 10 rounds vs 0.773 at 6).
 | Condition | Seeds | Efficiency | Price RMSD | Buyers' share (P\* share 0.483) |
 |---|---|---|---|---|
 | Oracle | 1 | 1.000 | 0.0 | 0.483 |
+| Centralized LLM (full information) | 5 | 0.926 ± 0.016 | 15.3 | 0.282 |
 | ZI-C | 10 | 0.773 ± 0.027 | 22.3 ± 2.5 | 0.502 ± 0.043 |
 | ZI-U | 10 | 0.850 ± 0.022 | 56.7 ± 2.5 | 0.470 ± 0.145 |
 | LLM full (analyst + memory) | 3 | **[TBD]** | **[TBD]** | **[TBD]** |
@@ -179,7 +181,19 @@ more on the analyst: prices converged tightly, but to about 88–90 rather than 
 *a* price rather than on *the* competitive price. This is a single seed, so the comparison is suggestive, not
 statistically established.
 
-### 3.6 Qualitative observations
+### 3.6 Centralized vs decentralized
+
+The centralized planner sees everything the market as a whole knows, so it could in principle compute P\* = 100
+exactly. Instead it chose 115 in 13 of 15 periods (100 once, 120 twice), reaching 0.926 ± 0.016 efficiency and
+handing most of the surplus to sellers (buyers' share 0.28 against 0.48 at P\*). Its explanations state that 115
+"maximizes total surplus" while the sums it writes out are wrong. The decentralized market, in which no agent
+sees more than its own units, did better (0.986 in v1). The task the single model fails at, aggregating 30
+private numbers into one price, is done implicitly by the trading process and the analyst. This is the clearest
+evidence in the project that splitting the problem across agents helps. Caveat: the planner's efficiency does
+not depend on session length, while the v1 comparison is one seed at 10 rounds; **[TBD: compare with LLM full at
+6 rounds once available]**.
+
+### 3.7 Qualitative observations
 
 From `report/excerpts/`:
 
@@ -190,7 +204,7 @@ From `report/excerpts/`:
 - Some apparently irrational bids (bid = own value) still earned a profit, because the CDA fills at the
   standing ask. Rules that protect agents can hide poor reasoning.
 
-### 3.7 Threats to validity
+### 3.8 Threats to validity
 
 - Small model (3B parameters); results may not transfer to stronger models.
 - Few seeds for LLM conditions (3) because each run takes 1–4 hours on the available hardware.

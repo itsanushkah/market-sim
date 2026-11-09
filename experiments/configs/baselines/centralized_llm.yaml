@@ -3,4 +3,4 @@ market: market/configs/symmetric.yaml
 seeds: [0,1,2,3,4]
 session: {n_periods: 3, rounds_per_period: 10, enforce_budget: true}
 centralized: {planner: llm}
-llm: {backend: anthropic, model: claude-opus-5-5, effort: low}
+llm: {backend: anthropic, model: claude-opus-5-5, effort: low, use_cache: false}   # no cache: each seed is a fresh sample

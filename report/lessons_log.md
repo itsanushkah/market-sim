@@ -39,3 +39,9 @@
   and the price settling at the analyst's ~88-90 instead of 100.
   Nuance: some "zero-profit" bids (bid = value) still earned profit, because the CDA fills at the standing ask.
   Reasoning text is often inconsistent with the numbers it cites (quotes 88.08 when the analyst said 88.02).
+- 2026-11-09: CENTRALIZED BASELINE (one qwen2.5:3b planner sees every value and cost, sets one clearing price;
+  5 seeds, cache off). It chose 115 in 13 of 15 periods (P* = 100; once 100, twice 120). Efficiency 0.926 ± 0.016,
+  price RMSD 15.3, buyers' share 0.28 (vs 0.48 at P*): the price was too high, so sellers gained.
+  Its reasoning says "115 maximizes total surplus" while its own surplus sums are wrong.
+  => With full information, a single small LLM still can't compute the equilibrium; the decentralized market
+  (v1, 0.986 at 10 rounds) did better without anyone seeing the whole picture. Strong point for "why multi-agent".

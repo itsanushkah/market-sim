@@ -1,0 +1,17 @@
+[
+ {
+  "period": 0,
+  "planner_price": 115.0,
+  "reasoning": "The price of 115 maximizes total surplus. At this price, we can match all buyers with the lowest-cost sellers, resulting in a total surplus of (160-40) + (130-70) + (100-100) + (150-50) + (120-75) + (95-105) + (140-60) + (115-80) + (90-110) + (135-65) + (110-85) + (85-115) + (125-75) = 220 + 180 + 0 + 110 + 70 + 0 + 40 + 30 +"
+ },
+ {
+  "period": 1,
+  "planner_price": 115.0,
+  "reasoning": "The price of 115 is chosen as it allows for the maximum number of trades while maximizing total surplus. At this price, buyers with values of at least 115 will trade, matched to sellers with costs of at most 115, resulting in a surplus of (115-40) + (115-50) + (115-60) + (115-65) + (115-75) + (115-80) + (115-85) + (115-90) = 15 units, which is the highest surplus achievable within the allowed price range."
+ },
+ {
+  "period": 2,
+  "planner_price": 100.0,
+  "reasoning": "The chosen price of 100 maximizes total surplus by matching all buyers with the lowest cost sellers. This results in a total surplus of 550 (100+100+100+100+100+40+70+100+60+110+65+115+75+90+120). Any other price within the allowed range would result in a lower total surplus."
+ }
+]

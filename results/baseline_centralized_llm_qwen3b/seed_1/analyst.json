@@ -1,0 +1,17 @@
+[
+ {
+  "period": 0,
+  "planner_price": 115.0,
+  "reasoning": "Choosing a price of 115 maximizes total surplus by aligning the highest-value buyers with the lowest-cost sellers, thus maximizing the value obtained by buyers and minimizing the cost to sellers."
+ },
+ {
+  "period": 1,
+  "planner_price": 115.0,
+  "reasoning": "The price of 115 maximises the total surplus. At this price, 2 buyers (B0 and B1) and 2 sellers (S0 and S1) trade. The total surplus is calculated as follows: (160 + 130 + 150 + 120 - 40 - 70 - 60 - 65) + (95 + 85 - 75 - 80) = 325 + 20 = 345."
+ },
+ {
+  "period": 2,
+  "planner_price": 115.0,
+  "reasoning": "The price of 115 maximizes total surplus. At this price, we can see that 2 buyers (B1 and B2) and 2 sellers (S1 and S2) will trade. The total surplus calculated is 15 (B1's value - B1's cost) + 10 (B2's value - B2's cost) + 35 (S1's cost - S1's value) + 20 (S2's cost - S2's value) = 80."
+ }
+]

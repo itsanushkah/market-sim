@@ -1,0 +1,15 @@
+{
+ "calls": 3,
+ "cache_hits": 0,
+ "failures": 0,
+ "input_tokens": 927,
+ "output_tokens": 486,
+ "cost_usd": 0.0,
+ "by_agent": {
+  "planner": {
+   "calls": 3,
+   "input_tokens": 927,
+   "output_tokens": 486
+  }
+ }
+}
