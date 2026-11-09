@@ -11,12 +11,16 @@ CMPSC 448 final project. All results so far come from a free local model (qwen2.
 
 ## Key findings so far
 
-> Preliminary: one seed per prompt version. The multi-seed comparison is in progress
+> Preliminary: one seed per prompt version (the centralized baseline has 5). The multi-seed comparison is in progress
 > (`experiments/run_laptop_plan.sh`) and will replace these numbers.
 
 - **Prompt and protocol fixes turned a losing market into a near-perfect one.** Allocative efficiency rose
   from **0.817 to 0.986**, above every one of 10 random-trader (ZI-C) seeds (mean 0.889). The fixes: filtering
   nonsense price beliefs, showing agents the profit arithmetic, and warning that the analyst can be wrong.
+- **Many agents with partial information beat one agent that sees everything.** Given every trader's private
+  values and costs, a single qwen2.5:3b "central planner" picked a price of 115 in 13 of 15 periods (true
+  equilibrium: 100) and reached **0.926 ± 0.016** efficiency over 5 seeds. The decentralized market got closer
+  to the optimum without any agent seeing the whole picture.
 - **Coordination can backfire.** In the first version, agents herded on a wrong analyst consensus (115 vs a
   true price of 100), and efficiency in the final period collapsed to 0.57.
 - **Agreement isn't the same as competitive pricing.** After the fixes, prices converged tightly, but to about
