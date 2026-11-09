@@ -33,3 +33,9 @@
   CE share 0.483. ZI-C r6 0.508, v0 0.520, v1 0.621: the coordinated v1 market settles below P* and shifts ~14 points
   of surplus to buyers. Efficiency went up, but the split became less competitive.
 - 2026-11-09: Summaries/plots now exclude mock runs by default (--include-mock to show them).
+- 2026-11-09: Behaviour categories (analysis/excerpts.py), v0 -> v1: loss attempts 17.5% -> 11.7%, zero-profit
+  orders 12.0% -> 5.5%, analyst-anchored orders 17.9% -> 23.7%, profitable accepts 6.9% -> 9.9%.
+  The fixes made agents more rational AND more reliant on the analyst, which explains both the efficiency gain
+  and the price settling at the analyst's ~88-90 instead of 100.
+  Nuance: some "zero-profit" bids (bid = value) still earned profit, because the CDA fills at the standing ask.
+  Reasoning text is often inconsistent with the numbers it cites (quotes 88.08 when the analyst said 88.02).
