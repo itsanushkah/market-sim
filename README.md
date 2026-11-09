@@ -1,87 +1,120 @@
-# market-sim: multi-agent LLM traders in a double auction
+# market-sim: can LLM agents with private information find the market price?
 
-CMPSC 448 final project. LLM trader agents with private information trade in a continuous double auction.
-An analyst agent coordinates them by aggregating their (disagreeing) price beliefs into a consensus signal.
-We measure whether this decentralized multi-agent system reaches the competitive equilibrium, and compare it
-against non-LLM traders and against a single centralized LLM that sees everything.
+Ten LLM trader agents, each knowing only its own private values or costs, trade a single good in a continuous
+double auction. A separate **analyst agent** collects their disagreeing price estimates and broadcasts a
+consensus. We measure how close this decentralized multi-agent system gets to the competitive equilibrium,
+which we compute exactly, and compare it with random traders and with ablations of each coordination mechanism.
 
-## Why multi-agent?
-Markets are multi-agent by nature: information (each trader's values/costs) is **private and distributed**.
-A single model can only solve the problem if someone hands it all the private information (the centralized
-baseline). The interesting question is whether specialized agents that each see only their own slice can
-coordinate, through prices and messages, to an outcome that is nearly as good, and at what cost.
+CMPSC 448 final project. All results so far come from a free local model (qwen2.5:3b via Ollama) on a laptop.
 
-## Layout
-```
-market/        order_book.py (CDA), auctioneer.py (round loop), config.py, equilibrium.py, configs/*.yaml
-agents/        base.py (shared interface), llm_trader.py, zi_trader.py, analyst.py, centralized.py, personas.py
-comms/         bus.py: message bus with channels analyst / beliefs / chat, all messages logged
-llm/           client.py: Claude API wrapper, structured JSON output, disk cache, token + $ accounting, mock backend
-experiments/   runner.py, configs/{baselines,main,ablations,robustness}/*.yaml
-analysis/      metrics.py (efficiency, price RMSD, Smith's alpha, ...), plots.py (report figures)
-dashboard/     app.py: Streamlit replay of logged runs (demo never makes live API calls)
-tests/         order book, equilibrium, end-to-end runs, cache
-results/       <experiment>/seed_<k>/{config.yaml, market.json, trades.jsonl, orders.jsonl, messages.jsonl,
-               analyst.json, metrics.json, llm_usage.json}
-report/        outline.md, figures/ (generated)
-```
+![System architecture](report/figures/architecture.png)
 
-## Setup
+## Key findings so far
+
+> Preliminary: one seed per prompt version. The multi-seed comparison is in progress
+> (`experiments/run_laptop_plan.sh`) and will replace these numbers.
+
+- **Prompt and protocol fixes turned a losing market into a near-perfect one.** Allocative efficiency rose
+  from **0.817 to 0.986**, above every one of 10 random-trader (ZI-C) seeds (mean 0.889). The fixes: filtering
+  nonsense price beliefs, showing agents the profit arithmetic, and warning that the analyst can be wrong.
+- **Coordination can backfire.** In the first version, agents herded on a wrong analyst consensus (115 vs a
+  true price of 100), and efficiency in the final period collapsed to 0.57.
+- **Agreement isn't the same as competitive pricing.** After the fixes, prices converged tightly, but to about
+  88–90 rather than 100, and buyers captured **62%** of the surplus instead of the competitive **48%**. Agents
+  anchored on the analyst more often (18% → 24% of orders), so the consensus became self-fulfilling.
+- **Small models make basic economic mistakes.** 12–18% of orders would have bought above value or sold below
+  cost, and reasoning text often contradicts the numbers it cites.
+
+![Before and after the prompt fixes](report/figures/prompt_fix_before_after.png)
+
+## How it works
+
+- **Market** (`market/`): continuous double auction with price-time priority. Trades execute at the standing
+  order's price. A budget constraint blocks loss-making trades and records each attempt. Each session has 3
+  periods; endowments reset each period, while agent memory carries over.
+- **Rounds**: every trader sees the same snapshot and decides in parallel, then orders arrive in random order,
+  so results don't depend on how fast each model responds.
+- **Agents** (`agents/`): LLM traders return schema-constrained JSON with an action, a price, a belief about
+  the equilibrium price and short reasoning. The analyst blends recent trade prices with the median belief and
+  reports how much traders disagree. Baselines: ZI-C and ZI-U random traders, an exact-equilibrium oracle, and a
+  centralized LLM planner.
+- **Communication** (`comms/bus.py`): `beliefs`, `analyst` and optional `chat` channels. Every message is
+  logged.
+- **LLM client** (`llm/client.py`): Ollama, Claude API or mock backend, with an on-disk response cache,
+  token accounting and tolerant JSON parsing.
+- **Evaluation** (`analysis/`): efficiency, price RMSD, Smith's α, surplus split, rationality rates, figures,
+  reasoning excerpts and an architecture diagram.
+
+## Quickstart
+
 ```bash
+git clone https://github.com/itsanushkah/market-sim.git && cd market-sim
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-pytest
+pytest                                   # 19 tests, no model needed
 ```
-LLM backends (pick one with `--backend`):
-- `ollama` (free, local): install Ollama, then `ollama pull qwen2.5:3b`. Calls run one at a time by default
-  (parallel calls are slower on an 8 GB laptop). A full run takes roughly 20–30 minutes.
-- `anthropic` (Claude API, paid): `export ANTHROPIC_API_KEY=...`.
-- `mock` (free, instant, not an LLM): for tests and pipeline checks only.
 
-## Running
+Pick an LLM backend with `--backend`:
+
+| Backend | Cost | Setup | Use for |
+|---|---|---|---|
+| `ollama` | free, local | install [Ollama](https://ollama.com), then `ollama pull qwen2.5:3b` | all reported results |
+| `anthropic` | paid | `export ANTHROPIC_API_KEY=...` | stronger-model runs |
+| `mock` | free, instant | none | tests and pipeline checks only; **not an LLM, never a result** |
+
 ```bash
-# Free dry run of every experiment (mock LLM policy). Use this to check the pipeline.
-python -m experiments.runner --all experiments/configs --backend mock
-
-# Real run of one condition on a free local model
+# One run of the main condition on the local model (about 1-4 h on an 8 GB laptop)
 python -m experiments.runner --config experiments/configs/main/llm_full.yaml --backend ollama --model qwen2.5:3b --seeds 0
 
-# Same with the Claude API (paid)
-python -m experiments.runner --config experiments/configs/main/llm_full.yaml --backend anthropic --model claude-haiku-5-5 --seeds 0
+# Short test run: 1 period, 6 rounds, saved under a separate name
+python -m experiments.runner --config experiments/configs/main/llm_full.yaml --backend ollama --model qwen2.5:3b \
+  --seeds 0 --periods 1 --rounds 6 --name-suffix _test
 
-# Tables + figures
-python -m analysis.metrics results          # prints mean ± 95% CI table, writes results/summary.csv
-python -m analysis.plots                    # writes report/figures/*.png
+# Full laptop plan: matched baselines + 4 LLM conditions x 3 seeds (restartable; finished runs are skipped)
+caffeinate -i bash experiments/run_laptop_plan.sh
 
-# Demo
+# Tables, figures, reasoning excerpts
+python -m analysis.metrics results       # mean ± 95% CI per condition, writes results/summary.csv
+python -m analysis.plots                 # report/figures/*.png (mock runs excluded)
+python -m analysis.excerpts results/llm_full_qwen3b_v1/seed_0
+python -m analysis.diagram               # architecture figure
+
+# Demo: replays logged runs, never calls a model
 streamlit run dashboard/app.py
 ```
-LLM responses are cached in `.llm_cache/`, so re-running a seed is free and reproducible.
 
-> **Mock results are not findings.** The mock backend is a simple heuristic so tests and dry runs cost
-> nothing. It ignores memory, chat and personas' prompts, so ablations look identical under mock.
-> Every number in the report must come from `--backend anthropic` runs.
+LLM responses are cached in `.llm_cache/`, so re-running a seed costs nothing and gives the same result.
 
 ## Experimental conditions
+
 | Group | Config | What it tests |
 |---|---|---|
-| Baselines | `zi_c`, `zi_u` | Zero-intelligence traders (Gode & Sunder 1993), with/without budget constraint |
-| | `centralized_oracle` | Exact equilibrium; upper bound |
-| | `centralized_llm` | One LLM sees all private info and sets a single clearing price |
+| Baselines | `zi_c`, `zi_u` | random traders with and without the budget constraint (Gode & Sunder 1993) |
+| | `centralized_oracle`, `centralized_llm` | exact equilibrium; one LLM that sees all private information |
 | Main | `llm_full` | LLM traders + analyst + memory |
-| Ablations | `no_analyst`, `no_memory`, `no_comms` | Value of each coordination mechanism |
-| | `analyst_llm` | Rule-based vs LLM analyst for resolving disagreement |
-| | `chat` | Public cheap talk between traders (look for collusion/signalling) |
-| | `personas_mixed` | Heterogeneous trader styles |
-| | `mixed_population` | Half LLM, half ZI-C: who captures surplus? |
-| Robustness | `shock`, `asymmetric`, `random_markets` | Regime change, lopsided surplus, unseen markets |
+| Ablations | `no_analyst`, `no_memory`, `no_comms` | the value of each coordination mechanism |
+| | `analyst_llm`, `chat`, `personas_mixed`, `mixed_population` | LLM analyst, cheap talk, heterogeneous styles, LLMs vs ZI |
+| Robustness | `shock`, `asymmetric`, `random_markets` | regime change, lopsided surplus, unseen markets |
 
-## Metrics
-Allocative efficiency, price RMSD from P*, Smith's alpha (final period), share of trades inside the
-equilibrium price band, quantity ratio, extramarginal trades, budget-violation (clip) rate, LLM error rate,
-LLM calls / tokens / USD per run. See `analysis/metrics.py`.
+Markets are in `market/configs/`. Main market: 5 buyers and 5 sellers with 3 units each; equilibrium
+Q\* = 11, P\* = 100, maximum surplus 600.
 
-## Budget
-With defaults (10 traders, 3 periods × 10 rounds, Opus 5.5 at low effort) a run makes up to ~300 trader calls
-(+30 if the analyst is an LLM). Check `results/<exp>/seed_<k>/llm_usage.json` after the first real run and
-scale seeds accordingly; try `--model claude-haiku-5-5` while iterating on prompts.
+## Repository layout
+
+```
+market/        order book, auctioneer (round loop), market configs, equilibrium calculator
+agents/        LLM trader, analyst, ZI traders, centralized planner, personas, shared interface
+comms/         message bus (beliefs / analyst / chat channels)
+llm/           LLM client: Ollama, Claude API, mock; cache; usage tracking
+experiments/   runner, YAML configs, laptop experiment plan
+analysis/      metrics, plots, diagram, reasoning excerpts, metric recompute
+dashboard/     Streamlit replay of logged runs
+tests/         order book, equilibrium, end-to-end runs, LLM client
+results/       <experiment>/seed_<k>/: config, market, orders (with reasoning), trades, messages, metrics
+report/        draft, outline, lessons log, figures, excerpts
+```
+
+## Limitations
+
+A 3B-parameter local model, few seeds per LLM condition (each run takes hours on a laptop), and a budget
+constraint that keeps agents from losing money even when they try to. See `report/draft.md` §3.7.
