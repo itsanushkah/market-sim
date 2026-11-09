@@ -1,0 +1,20 @@
+name: rob_shock_zi_c_r6
+market: market/configs/shock.yaml
+seeds:
+- 0
+- 1
+- 2
+- 3
+- 4
+- 5
+- 6
+- 7
+- 8
+- 9
+session:
+  n_periods: 3
+  rounds_per_period: 6
+  enforce_budget: true
+traders:
+  type: zi_c
+seed: 5

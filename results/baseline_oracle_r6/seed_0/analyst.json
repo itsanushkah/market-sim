@@ -1,0 +1,17 @@
+[
+ {
+  "period": 0,
+  "planner_price": 100.0,
+  "reasoning": "exact equilibrium"
+ },
+ {
+  "period": 1,
+  "planner_price": 100.0,
+  "reasoning": "exact equilibrium"
+ },
+ {
+  "period": 2,
+  "planner_price": 100.0,
+  "reasoning": "exact equilibrium"
+ }
+]

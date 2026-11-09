@@ -1,0 +1,50 @@
+{
+ "efficiency": 0.8,
+ "price_rmsd": 25.463756105492372,
+ "smith_alpha_last": 21.499696112709504,
+ "price_in_band": 0.0,
+ "quantity_ratio": 0.6060606060606061,
+ "extramarginal": 0,
+ "n_trades": 20,
+ "clip_rate": 0.0,
+ "pass_rate": 0.0,
+ "error_rate": 0.0,
+ "invalid_belief_rate": 0.0,
+ "llm_calls": 0,
+ "llm_cost_usd": 0.0,
+ "input_tokens": 0,
+ "output_tokens": 0,
+ "per_period": [
+  {
+   "period": 0,
+   "efficiency": 0.925,
+   "price_rmsd": 27.578499324655066,
+   "n_trades": 8,
+   "eq_quantity": 11,
+   "eq_price": 100.0,
+   "smith_alpha": 27.578499324655066
+  },
+  {
+   "period": 1,
+   "efficiency": 0.7416666666666667,
+   "price_rmsd": 19.132807774431157,
+   "n_trades": 6,
+   "eq_quantity": 11,
+   "eq_price": 100.0,
+   "smith_alpha": 19.132807774431157
+  },
+  {
+   "period": 2,
+   "efficiency": 0.7333333333333333,
+   "price_rmsd": 27.949604946522353,
+   "n_trades": 6,
+   "eq_quantity": 11,
+   "eq_price": 130.0,
+   "smith_alpha": 21.499696112709504
+  }
+ ],
+ "experiment": "rob_shock_zi_c_r6",
+ "seed": 3,
+ "wall_time_s": 0.01,
+ "backend": "none"
+}

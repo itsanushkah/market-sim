@@ -1,0 +1,11 @@
+name: baseline_oracle_r6
+market: market/configs/symmetric.yaml
+seeds:
+- 0
+session:
+  n_periods: 3
+  rounds_per_period: 6
+  enforce_budget: true
+centralized:
+  planner: oracle
+seed: 0
