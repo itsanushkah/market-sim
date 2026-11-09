@@ -1,0 +1,16 @@
+# Sellers' surplus is much larger than buyers' (flat demand, steep supply): equilibrium near the top of the range.
+# Tests whether LLM traders have a "fair split" bias that pulls prices toward the middle.
+name: asymmetric
+price_min: 0
+price_max: 200
+traders:
+  - {id: B0, role: buyer,  units: [150, 148, 146]}
+  - {id: B1, role: buyer,  units: [149, 147, 145]}
+  - {id: B2, role: buyer,  units: [148, 146, 144]}
+  - {id: B3, role: buyer,  units: [147, 145, 143]}
+  - {id: B4, role: buyer,  units: [146, 144, 142]}
+  - {id: S0, role: seller, units: [20, 60, 150]}
+  - {id: S1, role: seller, units: [30, 70, 155]}
+  - {id: S2, role: seller, units: [40, 80, 160]}
+  - {id: S3, role: seller, units: [45, 90, 165]}
+  - {id: S4, role: seller, units: [50, 100, 170]}

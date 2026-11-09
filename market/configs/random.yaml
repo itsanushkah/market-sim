@@ -1,0 +1,4 @@
+# Randomly generated market. With vary_market_with_seed: true, each seed gets a different market.
+name: random
+generator: {n_buyers: 5, n_sellers: 5, units_per_trader: 3, value_low: 60, value_high: 160,
+            cost_low: 40, cost_high: 140, seed: 100}
