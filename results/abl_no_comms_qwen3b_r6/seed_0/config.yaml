@@ -1,0 +1,25 @@
+name: abl_no_comms_qwen3b_r6
+market: market/configs/symmetric.yaml
+seeds:
+- 0
+- 1
+- 2
+- 3
+- 4
+session:
+  n_periods: 3
+  rounds_per_period: 6
+  enforce_budget: true
+  max_workers: 1
+traders:
+  type: llm
+  personas: neutral
+  memory: false
+  chat: false
+analyst:
+  enabled: false
+llm:
+  backend: ollama
+  model: qwen2.5:3b
+  effort: low
+seed: 0

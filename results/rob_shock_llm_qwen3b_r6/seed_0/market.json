@@ -1,0 +1,99 @@
+{
+ "name": "shock",
+ "price_min": 0,
+ "price_max": 220,
+ "shock_period": 2,
+ "shock_delta": 30,
+ "traders": [
+  {
+   "id": "B0",
+   "role": "buyer",
+   "units": [
+    160,
+    130,
+    100
+   ]
+  },
+  {
+   "id": "B1",
+   "role": "buyer",
+   "units": [
+    150,
+    120,
+    95
+   ]
+  },
+  {
+   "id": "B2",
+   "role": "buyer",
+   "units": [
+    140,
+    115,
+    90
+   ]
+  },
+  {
+   "id": "B3",
+   "role": "buyer",
+   "units": [
+    135,
+    110,
+    85
+   ]
+  },
+  {
+   "id": "B4",
+   "role": "buyer",
+   "units": [
+    125,
+    105,
+    80
+   ]
+  },
+  {
+   "id": "S0",
+   "role": "seller",
+   "units": [
+    40,
+    70,
+    100
+   ]
+  },
+  {
+   "id": "S1",
+   "role": "seller",
+   "units": [
+    50,
+    75,
+    105
+   ]
+  },
+  {
+   "id": "S2",
+   "role": "seller",
+   "units": [
+    60,
+    80,
+    110
+   ]
+  },
+  {
+   "id": "S3",
+   "role": "seller",
+   "units": [
+    65,
+    85,
+    115
+   ]
+  },
+  {
+   "id": "S4",
+   "role": "seller",
+   "units": [
+    75,
+    90,
+    120
+   ]
+  }
+ ]
+}
