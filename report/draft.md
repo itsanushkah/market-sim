@@ -1,8 +1,7 @@
 # Report draft: design and evaluation sections
 
-> Working draft. Numbers marked **[TBD]** come from the overnight runs (`experiments/run_laptop_plan.sh`) and
-> must be filled in from `results/summary.csv` before submission. Everything else reflects the code as of
-> commit `adf2c70`. Rewrite in your own voice; sections 1 (problem) and 4 (lessons) are not drafted here.
+> Working draft. All numbers come from `results/summary.csv` after the overnight runs
+> (`experiments/run_laptop_plan.sh`, finished 2026-11-10). Rewrite in your own voice; sections 1 (problem) and 4 (lessons) are not drafted here.
 
 ---
 
@@ -147,17 +146,36 @@ at 10 rounds vs 0.773 at 6).
 | Centralized LLM (full information) | 5 | 0.926 ± 0.016 | 15.3 | 0.282 |
 | ZI-C | 10 | 0.773 ± 0.027 | 22.3 ± 2.5 | 0.502 ± 0.043 |
 | ZI-U | 10 | 0.850 ± 0.022 | 56.7 ± 2.5 | 0.470 ± 0.145 |
-| LLM full (analyst + memory) | 3 | **[TBD]** | **[TBD]** | **[TBD]** |
-| LLM, no analyst | 3 | **[TBD]** | **[TBD]** | **[TBD]** |
-| LLM, no communication | 3 | **[TBD]** | **[TBD]** | **[TBD]** |
+| LLM full (analyst + memory) | 3 | **0.945 ± 0.029** | 29.4 ± 1.3 | 0.430 ± 0.063 |
+| LLM, no analyst | 3 | 0.888 ± 0.062 | 30.1 ± 2.2 | 0.597 ± 0.025 |
+| LLM, no communication | 3 | 0.865 ± 0.067 | 33.1 ± 4.3 | 0.637 ± 0.059 |
 
-± is a 95% confidence interval over seeds. Shock market: ZI-C 0.748 ± 0.032, LLM full **[TBD]**.
+± is a 95% confidence interval over seeds (normal approximation; with only 3 seeds a t-based interval would be
+about twice as wide for the LLM rows). Per-seed efficiency: LLM full 0.922 / 0.942 / 0.972; no analyst
+0.917 / 0.825 / 0.922; no communication 0.931 / 0.847 / 0.817. Shock market: ZI-C 0.748 ± 0.032, LLM full
+0.934 ± 0.053 (0.981 / 0.936 / 0.886).
+
+| Behaviour (share of decisions, 3 seeds pooled) | LLM full | No analyst | No comms |
+|---|---|---|---|
+| Would have traded at a loss (clipped) | 13.8% | 5.3% | 5.0% |
+| Priced at exactly own value/cost | 10.3% | 12.0% | 14.9% |
+| Anchored on the analyst's estimate | 17.0% | n/a | n/a |
+| Accepted the opposite quote at a profit | 12.4% | 10.7% | 10.1% |
 
 Figures: `efficiency_by_condition.png`, `efficiency_by_period.png`, `rmsd_by_condition.png`,
 `surplus_split.png`, `price_paths_*.png`.
 
-**[TBD: 3–4 sentences interpreting the table once filled: does the analyst help compared with no_analyst and
-no_comms? Do LLM agents beat ZI-C at equal session length?]**
+Every LLM condition beats ZI-C at the same session length (0.865–0.945 vs 0.773), and every LLM seed beats
+every ZI-C seed. Adding coordination raises efficiency step by step: no communication 0.865, belief sharing
+without an analyst 0.888, full system 0.945. The full system is also the most stable: its lowest seed (0.922)
+is above the mean of both ablations, and no period drops below 0.88, while both ablations have periods at
+0.70–0.78. With 3 seeds the intervals still overlap, so the ordering is consistent but not statistically
+established. The analyst also changes *who* gains: without it, buyers take about 60% of the surplus; with it,
+the split (0.43) is closer to the competitive 0.48. One caveat cuts the other way: agents with the analyst
+attempt nearly three times as many loss-making orders (13.8% vs about 5%), because they price toward the
+consensus even when it lies beyond their own value or cost. The budget constraint clips these orders, so part of
+the analyst's benefit depends on that safety net. Price RMSD is higher for all LLM conditions than for ZI-C
+(about 30 vs 22), because LLM agents open each period with extreme quotes (41, 160) that sometimes trade.
 
 ### 3.5 Effect of the prompt and protocol fixes (10 rounds per period, seed 0)
 
@@ -190,8 +208,9 @@ handing most of the surplus to sellers (buyers' share 0.28 against 0.48 at P\*).
 sees more than its own units, did better (0.986 in v1). The task the single model fails at, aggregating 30
 private numbers into one price, is done implicitly by the trading process and the analyst. This is the clearest
 evidence in the project that splitting the problem across agents helps. Caveat: the planner's efficiency does
-not depend on session length, while the v1 comparison is one seed at 10 rounds; **[TBD: compare with LLM full at
-6 rounds once available]**.
+not depend on session length, while the v1 comparison is one seed at 10 rounds; at 6 rounds per period the decentralized
+market (0.945 ± 0.029, 3 seeds) still beats the planner (0.926 ± 0.016), but the intervals overlap, so the
+claim is "at least as good, with no agent seeing the whole market", not "clearly better".
 
 ### 3.7 Qualitative observations
 

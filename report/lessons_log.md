@@ -45,3 +45,10 @@
   Its reasoning says "115 maximizes total surplus" while its own surplus sums are wrong.
   => With full information, a single small LLM still can't compute the equilibrium; the decentralized market
   (v1, 0.986 at 10 rounds) did better without anyone seeing the whole picture. Strong point for "why multi-agent".
+
+## 2026-11-10: three-seed results (6 rounds per period)
+
+- The overnight plan finished at 05:14. Runs took 10 min to 6.5 h each; the slow ones coincided with the laptop being busy or throttled.
+- With seed 0 alone the analyst looked useless (0.922 vs 0.917 without it). With 3 seeds the ordering is clear: no comms 0.865, no analyst 0.888, full 0.945. Lesson: don't revise a story on one seed in either direction.
+- The analyst pulls the surplus split toward competitive (0.43 vs 0.60 without), but agents with an analyst attempt ~3× more loss-making orders. The budget constraint absorbs those, so the analyst's gain partly relies on it.
+- Bug found while regenerating excerpts: `analysis/excerpts.py` assumed 10 rounds when looking up the previous period's analyst estimate. Fixed to use the last logged round.

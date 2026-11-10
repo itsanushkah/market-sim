@@ -43,10 +43,14 @@ def main(run: Path, out_dir: Path = Path("report/excerpts"), seed: int = 0) -> P
     analyst = json.loads((run / "analyst.json").read_text())
     msgs = [json.loads(l) for l in open(run / "messages.jsonl")]
     est_at = {(a["period"], a["round"]): a.get("estimate") for a in analyst}
+    last_round: dict[int, int] = {}
+    for a in analyst:  # last analyst round of each period (sessions may have 6 or 10 rounds)
+        last_round[a["period"]] = max(last_round.get(a["period"], -1), a["round"])
 
     buckets: dict[str, list[dict]] = {}
     for o in orders:
-        prev = est_at.get((o["period"], o["round"] - 1)) if o["round"] > 0 else est_at.get((o["period"] - 1, 9))
+        prev = (est_at.get((o["period"], o["round"] - 1)) if o["round"] > 0
+                else est_at.get((o["period"] - 1, last_round.get(o["period"] - 1, -1))))
         for c in classify(o, prev):
             buckets.setdefault(c, []).append(dict(o, analyst_estimate=prev))
 

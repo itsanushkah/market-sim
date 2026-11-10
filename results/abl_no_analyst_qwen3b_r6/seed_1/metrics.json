@@ -1,0 +1,52 @@
+{
+ "efficiency": 0.825,
+ "price_rmsd": 31.965476168307998,
+ "smith_alpha_last": 28.548204847240395,
+ "price_in_band": 0.041666666666666664,
+ "quantity_ratio": 0.7272727272727273,
+ "extramarginal": 2,
+ "n_trades": 24,
+ "buyer_share": 0.571043771043771,
+ "buyer_share_ce": 0.48333333333333334,
+ "clip_rate": 0.10476190476190476,
+ "pass_rate": 0.4,
+ "error_rate": 0.0,
+ "invalid_belief_rate": 0.0,
+ "llm_calls": 175,
+ "llm_cost_usd": 0.0,
+ "input_tokens": 86302,
+ "output_tokens": 20064,
+ "per_period": [
+  {
+   "period": 0,
+   "efficiency": 0.8166666666666667,
+   "price_rmsd": 41.92169571270431,
+   "n_trades": 7,
+   "eq_quantity": 11,
+   "eq_price": 100.0,
+   "smith_alpha": 41.92169571270431
+  },
+  {
+   "period": 1,
+   "efficiency": 0.825,
+   "price_rmsd": 25.168322241350225,
+   "n_trades": 9,
+   "eq_quantity": 11,
+   "eq_price": 100.0,
+   "smith_alpha": 25.168322241350225
+  },
+  {
+   "period": 2,
+   "efficiency": 0.8333333333333334,
+   "price_rmsd": 28.548204847240395,
+   "n_trades": 8,
+   "eq_quantity": 11,
+   "eq_price": 100.0,
+   "smith_alpha": 28.548204847240395
+  }
+ ],
+ "experiment": "abl_no_analyst_qwen3b_r6",
+ "seed": 1,
+ "wall_time_s": 1364.73,
+ "backend": "ollama"
+}

@@ -11,16 +11,30 @@ CMPSC 448 final project. All results so far come from a free local model (qwen2.
 
 ## Key findings so far
 
-> Preliminary: one seed per prompt version (the centralized baseline has 5). The multi-seed comparison is in progress
-> (`experiments/run_laptop_plan.sh`) and will replace these numbers.
+Main comparison: 3 periods × 6 rounds, symmetric market, qwen2.5:3b, 3 seeds per LLM condition and 10 per
+baseline. ± is a 95% interval over seeds; with 3 seeds, treat differences as consistent rather than proven.
 
-- **Prompt and protocol fixes turned a losing market into a near-perfect one.** Allocative efficiency rose
+| Condition | Efficiency | Buyers' share (competitive: 0.48) |
+|---|---|---|
+| ZI-C random traders | 0.773 ± 0.027 | 0.50 |
+| LLM, no communication | 0.865 ± 0.067 | 0.64 |
+| LLM, beliefs shared, no analyst | 0.888 ± 0.062 | 0.60 |
+| Centralized LLM planner (sees everything) | 0.926 ± 0.016 | 0.28 |
+| **LLM full (analyst + memory)** | **0.945 ± 0.029** | **0.43** |
+
+- **Every LLM condition beats random traders, and each coordination layer adds efficiency.** No communication
+  0.865, shared beliefs 0.888, full system with the analyst 0.945. The full system was also the most stable:
+  its worst seed (0.922) beat both ablations' averages. The same holds after a supply shock (0.934 vs ZI-C 0.748).
+- **The analyst helps, but leans on a safety net.** With the analyst, agents tried nearly three times as many
+  loss-making orders (14% vs 5%), pricing toward the consensus past their own value. The budget constraint
+  blocked these.
+- **Prompt and protocol fixes turned a losing market into a near-perfect one** (seed 0, 10 rounds per period). Efficiency rose
   from **0.817 to 0.986**, above every one of 10 random-trader (ZI-C) seeds (mean 0.889). The fixes: filtering
   nonsense price beliefs, showing agents the profit arithmetic, and warning that the analyst can be wrong.
-- **Many agents with partial information beat one agent that sees everything.** Given every trader's private
+- **Many agents with partial information match or beat one agent that sees everything.** Given every trader's private
   values and costs, a single qwen2.5:3b "central planner" picked a price of 115 in 13 of 15 periods (true
-  equilibrium: 100) and reached **0.926 ± 0.016** efficiency over 5 seeds. The decentralized market got closer
-  to the optimum without any agent seeing the whole picture.
+  equilibrium: 100) and reached **0.926 ± 0.016** efficiency over 5 seeds. The decentralized market did at least as well
+  (0.945) without any agent seeing the whole picture.
 - **Coordination can backfire.** In the first version, agents herded on a wrong analyst consensus (115 vs a
   true price of 100), and efficiency in the final period collapsed to 0.57.
 - **Agreement isn't the same as competitive pricing.** After the fixes, prices converged tightly, but to about
@@ -120,5 +134,5 @@ report/        draft, outline, lessons log, figures, excerpts
 
 ## Limitations
 
-A 3B-parameter local model, few seeds per LLM condition (each run takes hours on a laptop), and a budget
+A 3B-parameter local model, 3 seeds per LLM condition (each run takes 10 min to 6 h on a laptop), and a budget
 constraint that keeps agents from losing money even when they try to. See `report/draft.md` §3.7.

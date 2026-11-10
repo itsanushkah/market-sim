@@ -1,0 +1,60 @@
+{
+ "calls": 177,
+ "cache_hits": 58,
+ "failures": 0,
+ "input_tokens": 55468,
+ "output_tokens": 12763,
+ "cost_usd": 0.0,
+ "by_agent": {
+  "B0": {
+   "calls": 16,
+   "input_tokens": 5604,
+   "output_tokens": 1243
+  },
+  "B1": {
+   "calls": 18,
+   "input_tokens": 5597,
+   "output_tokens": 1247
+  },
+  "B2": {
+   "calls": 18,
+   "input_tokens": 5589,
+   "output_tokens": 1304
+  },
+  "B3": {
+   "calls": 18,
+   "input_tokens": 5581,
+   "output_tokens": 1232
+  },
+  "B4": {
+   "calls": 17,
+   "input_tokens": 5120,
+   "output_tokens": 1030
+  },
+  "S0": {
+   "calls": 18,
+   "input_tokens": 5597,
+   "output_tokens": 1290
+  },
+  "S1": {
+   "calls": 18,
+   "input_tokens": 5602,
+   "output_tokens": 1369
+  },
+  "S2": {
+   "calls": 18,
+   "input_tokens": 5587,
+   "output_tokens": 1409
+  },
+  "S3": {
+   "calls": 18,
+   "input_tokens": 5593,
+   "output_tokens": 1376
+  },
+  "S4": {
+   "calls": 18,
+   "input_tokens": 5598,
+   "output_tokens": 1263
+  }
+ }
+}
