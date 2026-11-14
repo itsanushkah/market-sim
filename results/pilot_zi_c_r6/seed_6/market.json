@@ -1,0 +1,57 @@
+{
+ "name": "pilot",
+ "price_min": 0,
+ "price_max": 200,
+ "shock_period": null,
+ "shock_delta": 0.0,
+ "traders": [
+  {
+   "id": "B0",
+   "role": "buyer",
+   "units": [
+    150,
+    110
+   ]
+  },
+  {
+   "id": "B1",
+   "role": "buyer",
+   "units": [
+    140,
+    95
+   ]
+  },
+  {
+   "id": "B2",
+   "role": "buyer",
+   "units": [
+    125,
+    85
+   ]
+  },
+  {
+   "id": "S0",
+   "role": "seller",
+   "units": [
+    50,
+    90
+   ]
+  },
+  {
+   "id": "S1",
+   "role": "seller",
+   "units": [
+    60,
+    105
+   ]
+  },
+  {
+   "id": "S2",
+   "role": "seller",
+   "units": [
+    70,
+    115
+   ]
+  }
+ ]
+}

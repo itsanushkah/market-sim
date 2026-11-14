@@ -1,0 +1,60 @@
+{
+ "efficiency": 0.8496732026143791,
+ "price_rmsd": 23.727564607903233,
+ "smith_alpha_last": 13.85198301086647,
+ "price_in_band": 0.3333333333333333,
+ "converge_round": 5.666666666666667,
+ "settled_share": 0.2222222222222222,
+ "quantity_ratio": 0.75,
+ "extramarginal": 1,
+ "n_trades": 9,
+ "buyer_share": 0.4797076923076924,
+ "buyer_share_ce": 0.49019607843137253,
+ "clip_rate": 0.009523809523809525,
+ "pass_rate": 0.0,
+ "error_rate": 0.0,
+ "invalid_belief_rate": 0.0,
+ "llm_calls": 0,
+ "llm_cost_usd": 0.0,
+ "input_tokens": 0,
+ "output_tokens": 0,
+ "per_period": [
+  {
+   "period": 0,
+   "efficiency": 0.9215686274509803,
+   "price_rmsd": 14.33121302146705,
+   "n_trades": 3,
+   "eq_quantity": 4,
+   "eq_price": 100.0,
+   "converge_round": 3,
+   "settled_trades": 2,
+   "smith_alpha": 14.331213021467052
+  },
+  {
+   "period": 1,
+   "efficiency": 0.7058823529411765,
+   "price_rmsd": 35.940657571428304,
+   "n_trades": 3,
+   "eq_quantity": 4,
+   "eq_price": 100.0,
+   "converge_round": 7,
+   "settled_trades": 0,
+   "smith_alpha": 35.940657571428304
+  },
+  {
+   "period": 2,
+   "efficiency": 0.9215686274509803,
+   "price_rmsd": 13.851983010866471,
+   "n_trades": 3,
+   "eq_quantity": 4,
+   "eq_price": 100.0,
+   "converge_round": 7,
+   "settled_trades": 0,
+   "smith_alpha": 13.85198301086647
+  }
+ ],
+ "experiment": "pilot_zi_c_r6",
+ "seed": 3,
+ "wall_time_s": 0.01,
+ "backend": "none"
+}

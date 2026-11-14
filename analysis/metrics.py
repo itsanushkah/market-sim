@@ -5,6 +5,10 @@ Per run:
 - price_rmsd          RMS deviation of trade prices from the CE midpoint
 - smith_alpha_last    Smith's alpha (100 * rmsd / P*) in the final period (convergence measure)
 - price_in_band       fraction of trades priced inside the CE price interval
+- converge_round      convergence speed: mean over periods of the first round (1-based) from which every
+                      later trade in that period is within +/-10% of P*. A period that never settles counts
+                      as rounds_per_period + 1.
+- settled_share       fraction of trades that happen after the market has settled (same definition)
 - quantity_ratio      units traded / CE quantity
 - extramarginal       trades involving a unit that should not trade in CE (value < P_low or cost > P_high)
 - clip_rate           fraction of submitted orders that violated the budget constraint (agent "irrationality")
@@ -34,6 +38,8 @@ def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], o
     max_surplus = sum(e.max_surplus for e in eqs)
     realized = sum(t["surplus"] for t in trades)
     devs, in_band, extramarginal, per_period = [], 0, 0, []
+    n_rounds = 1 + max([o["round"] for o in orders] + [t.get("round", 0) for t in trades], default=0)
+    settled_trades = 0
     for p, e in enumerate(eqs):
         pt = [t for t in trades if t["period"] == p]
         pdevs = [t["price"] - e.price_mid for t in pt]
@@ -42,8 +48,11 @@ def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], o
         extramarginal += sum(t["buyer_value"] < e.price_low or t["seller_cost"] > e.price_high for t in pt)
         p_eff = sum(t["surplus"] for t in pt) / e.max_surplus if e.max_surplus else float("nan")
         p_rmsd = _rms(pdevs)
+        conv_round, n_settled = _convergence(pt, e.price_mid, n_rounds)
+        settled_trades += n_settled
         per_period.append({"period": p, "efficiency": p_eff, "price_rmsd": p_rmsd, "n_trades": len(pt),
                            "eq_quantity": e.quantity, "eq_price": e.price_mid,
+                           "converge_round": conv_round, "settled_trades": n_settled,
                            "smith_alpha": 100 * p_rmsd / e.price_mid if e.price_mid and pt else float("nan")})
     # Surplus split: what share of realized surplus went to buyers, vs. the share they'd get at the CE price.
     buyer_surplus = sum(t["buyer_value"] - t["price"] for t in trades)
@@ -57,6 +66,8 @@ def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], o
         "price_rmsd": _rms(devs),
         "smith_alpha_last": per_period[-1]["smith_alpha"] if per_period else float("nan"),
         "price_in_band": in_band / len(trades) if trades else float("nan"),
+        "converge_round": float(np.mean([pp["converge_round"] for pp in per_period])) if per_period else float("nan"),
+        "settled_share": settled_trades / len(trades) if trades else float("nan"),
         "quantity_ratio": len(trades) / sum(e.quantity for e in eqs) if eqs else float("nan"),
         "extramarginal": extramarginal,
         "n_trades": len(trades),
@@ -74,12 +85,34 @@ def compute_run_metrics(cfg: MarketConfig, n_periods: int, trades: list[dict], o
     }
 
 
+CONVERGENCE_TOL = 0.10  # a trade is "near equilibrium" if within 10% of P*
+
+
+def _convergence(period_trades: list[dict], p_star: float, n_rounds: int) -> tuple[int, int]:
+    """(first 1-based round from which all later trades are near P*, number of trades in that settled tail).
+    If the last trade of the period is still off, the period never settled: (n_rounds + 1, 0)."""
+    tail = 0
+    for t in reversed(period_trades):
+        if abs(t["price"] - p_star) > CONVERGENCE_TOL * p_star:
+            break
+        tail += 1
+    if tail == 0:
+        return n_rounds + 1, 0
+    first = period_trades[len(period_trades) - tail]
+    # If an off-price trade happened earlier in the same round, the market settled from the next round on.
+    earlier_off = len(period_trades) > tail and period_trades[len(period_trades) - tail - 1].get("round", 0) == first.get("round", 0)
+    rnd = first.get("round", 0) + 1 + (1 if earlier_off else 0)
+    if earlier_off:
+        tail = sum(t.get("round", 0) + 1 >= rnd for t in period_trades[len(period_trades) - tail:])
+    return (rnd, tail) if tail else (n_rounds + 1, 0)
+
+
 def _rms(xs) -> float:
     return math.sqrt(sum(x * x for x in xs) / len(xs)) if xs else float("nan")
 
 
 # ---------------------------------------------------------------------------
-SUMMARY_KEYS = ["efficiency", "price_rmsd", "smith_alpha_last", "price_in_band", "quantity_ratio",
+SUMMARY_KEYS = ["efficiency", "price_rmsd", "smith_alpha_last", "price_in_band", "converge_round", "settled_share", "quantity_ratio",
                 "buyer_share", "buyer_share_ce",
                 "extramarginal", "clip_rate", "error_rate", "invalid_belief_rate", "llm_calls", "llm_cost_usd"]
 

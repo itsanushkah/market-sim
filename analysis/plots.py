@@ -105,7 +105,7 @@ def plot_cost_vs_eff(rows: list[dict], out: Path) -> None:
 def plot_efficiency_by_period(results_dir: Path, out: Path, suffix: str = "_r6") -> None:
     """Only runs with the same session length (name ends with `suffix`) are comparable on one chart."""
     runs = {k: v for k, v in load_all(results_dir).items()
-            if k.endswith(suffix) and "oracle" not in k and "shock" not in k}
+            if k.endswith(suffix) and "oracle" not in k and "shock" not in k and "pilot" not in k}
     if not runs:
         return
     fig, ax = plt.subplots(figsize=(5.5, 3.4))
@@ -121,6 +121,44 @@ def plot_efficiency_by_period(results_dir: Path, out: Path, suffix: str = "_r6")
     ax.set_xticks([1, 2, 3])
     ax.legend(frameon=False, fontsize=7, loc="lower left")
     fig.tight_layout(); fig.savefig(out); plt.close(fig)
+
+
+def plot_convergence_by_round(results_dir: Path, out: Path, suffix: str = "_r6", market: str = "symmetric") -> None:
+    """Convergence speed: mean |trade price - P*| in each round, pooled over periods and seeds."""
+    fig, ax = plt.subplots(figsize=(5.5, 3.4))
+    palette = iter(["#2a6fdb", "#e07b39", "#3a9a5b", "#9b59b6", "#c0392b", "#16a085"])
+    drawn = 0
+    for exp_dir in sorted(results_dir.iterdir(), key=lambda d: (d.name.startswith("baseline"), d.name)):
+        if not (exp_dir.is_dir() and exp_dir.name.endswith(suffix)) or "oracle" in exp_dir.name:
+            continue
+        by_round: dict[int, list[float]] = {}
+        n = 0
+        for run in sorted(exp_dir.glob("seed_*")):
+            mf = run / "metrics.json"
+            if not mf.exists() or json.loads(mf.read_text()).get("backend") == "mock":
+                continue
+            cfg = load_market_json(run / "market.json")
+            if cfg.name != market:
+                continue
+            n += 1
+            for line in open(run / "trades.jsonl"):
+                t = json.loads(line)
+                p_star = compute_equilibrium(cfg.for_period(t["period"])).price_mid
+                by_round.setdefault(t["round"], []).append(abs(t["price"] - p_star))
+        if not by_round:
+            continue
+        rounds = sorted(by_round)
+        baseline = exp_dir.name.startswith("baseline")
+        ax.plot([r + 1 for r in rounds], [sum(by_round[r]) / len(by_round[r]) for r in rounds], marker="o", ms=3,
+                ls="--" if baseline else "-", color=C_BASE if baseline and "zi_c" in exp_dir.name else next(palette),
+                label=f"{exp_dir.name.removesuffix(suffix)} (n={n})")
+        drawn += 1
+    if drawn:
+        ax.set(xlabel="round within period", ylabel="mean |price - P*|", ylim=(0, None),
+               title=f"Price convergence within a period ({market} market)")
+        ax.legend(frameon=False, fontsize=7)
+        fig.tight_layout(); fig.savefig(out)
+    plt.close(fig)
 
 
 def plot_surplus_split(rows: list[dict], out: Path) -> None:
@@ -199,6 +237,7 @@ def main():
         plot_cost_vs_eff(rows, out / "cost_vs_efficiency.png")
         plot_surplus_split(rows, out / "surplus_split.png")
     plot_efficiency_by_period(res, out / "efficiency_by_period.png")
+    plot_convergence_by_round(res, out / "convergence_by_round.png")
     plot_before_after(res, "llm_full_qwen3b_v0", "llm_full_qwen3b_v1", out / "prompt_fix_before_after.png")
     print(f"figures written to {out}/")
 

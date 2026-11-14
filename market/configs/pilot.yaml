@@ -1,0 +1,12 @@
+# Small pilot market (TA recommendation): one good, 3 buyers x 2 units, 3 sellers x 2 units.
+# Competitive equilibrium: Q* = 4 units, P* in [95, 105] (midpoint 100), max surplus = 255.
+name: pilot
+price_min: 0
+price_max: 200
+traders:
+  - {id: B0, role: buyer,  units: [150, 110]}
+  - {id: B1, role: buyer,  units: [140, 95]}
+  - {id: B2, role: buyer,  units: [125, 85]}
+  - {id: S0, role: seller, units: [50, 90]}
+  - {id: S1, role: seller, units: [60, 105]}
+  - {id: S2, role: seller, units: [70, 115]}

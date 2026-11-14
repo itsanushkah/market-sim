@@ -67,6 +67,42 @@ Agents communicate through a message bus with three channels (`comms/bus.py`). A
 3. **chat** (trader to trader, optional): public, non-binding messages. This channel is off in the main
    condition and on in the `chat` ablation.
 
+#### The analyst's role in detail
+
+*What it can access.* Only public or volunteered information: (a) the prices of completed trades, which every
+trader also sees, and (b) the price estimate ("belief") that each trader posts on the `beliefs` channel each
+round. It cannot see any trader's private values or costs, the reasoning text, or unfilled orders. It never
+trades and has no stake in the price. This matters for the comparison in 3.6: the centralized planner sees all
+30 private numbers, while the analyst sees none of them.
+
+*What it does with them.* The two sources answer the same question (what is the market price?) in different
+ways. Trade prices are hard evidence, but there are few of them early in a period and early trades are often far
+from equilibrium. Beliefs are available from round 1 but are guesses from a small model. The rule-based analyst
+used in all main results combines them as
+
+    estimate = 0.6 × median(last 5 trade prices) + 0.4 × median(valid beliefs this round)
+
+and uses the belief median alone before the first trade. If no source is available it repeats its last estimate.
+
+*When sources agree or conflict.*
+
+| Situation | What the analyst does |
+|---|---|
+| Traders' beliefs agree with each other | Small spread (IQR) is broadcast, signalling a firm consensus |
+| Traders' beliefs conflict | The median is used, so a minority of extreme beliefs cannot move the estimate; the IQR is broadcast so traders can see the disagreement and discount the estimate |
+| Invalid beliefs (0, negative, above the price cap) | Removed by the auctioneer before the analyst reads them |
+| Beliefs conflict with trade prices | Trades get the larger weight (0.6), because they are commitments rather than opinions; the estimate moves toward beliefs only partly |
+| A few outlier trades (e.g. an opening trade at 41 or 160) | Median of the last five trades, so one or two outliers are ignored |
+
+The broadcast is one line, e.g. "Consensus equilibrium estimate: 104.2; traders disagree by about 12.0 (IQR).
+Recent trades: [...]". Traders read it the next round and are told it "is a summary of other traders' guesses
+and may be wrong". Every estimate, spread and number of beliefs used is logged in `analyst.json`.
+
+*Known weakness.* The analyst can only be as good as its inputs. If most traders share the same wrong belief,
+the median is wrong too, and broadcasting it reinforces the error (the herding episode in 2.5). An LLM analyst
+variant (`analyst_llm`) receives the same inputs and writes the estimate itself; it is implemented but not
+included in the reported runs.
+
 ### 2.5 Optimization of the collaboration
 
 We changed the system in response to measured failures (full log in `report/lessons_log.md`):
@@ -116,6 +152,9 @@ truth.
   traded and no inefficient one did).
 - **Price RMSD**: root-mean-square deviation of trade prices from P\*; **Smith's α** = 100 × RMSD / P\* in the
   final period (convergence).
+- **Convergence speed**: for each period, the first round from which every later trade is within ±10% of P\*
+  (`converge_round`; a period that never settles counts as rounds + 1), the share of trades made after that
+  point (`settled_share`), and the mean |price − P\*| in each round (`convergence_by_round.png`).
 - **Share of trades inside the equilibrium price band**, **quantity ratio** (units traded / Q\*) and
   **extramarginal trades** (units that should not trade at P\*).
 - **Buyers' share of surplus**, compared with the share they would get at P\*.
@@ -176,6 +215,23 @@ attempt nearly three times as many loss-making orders (13.8% vs about 5%), becau
 consensus even when it lies beyond their own value or cost. The budget constraint clips these orders, so part of
 the analyst's benefit depends on that safety net. Price RMSD is higher for all LLM conditions than for ZI-C
 (about 30 vs 22), because LLM agents open each period with extreme quotes (41, 160) that sometimes trade.
+
+**Convergence speed.** Efficiency and price convergence turn out to be different things here.
+
+| Condition | Round at which prices settle (of 6; 7 = never) | Trades made after settling | Mean \|price − P\*\| in rounds 1–2 → 5–6 |
+|---|---|---|---|
+| ZI-C | 6.0 ± 0.6 | 10% | 20 → 12 |
+| LLM, no communication | 6.2 ± 0.8 | 5% | 42 → 18 |
+| LLM, no analyst | 6.3 ± 0.4 | 5% | 35 → 17 |
+| LLM full (analyst + memory) | **5.6 ± 0.2** | **15%** | 34 → 14 |
+
+No condition reliably converges within 6 rounds: most periods end before all trades are within 10% of P\*. LLM
+traders start each period much further from equilibrium than random traders (opening quotes near 41 and 160),
+then close most of the gap by round 3. The full system settles slightly earlier and three times as many of its
+trades happen at near-equilibrium prices compared with the ablations, but 15% is still low. So the LLM market's
+advantage over ZI-C is in *who trades* (efficiency), not in *price accuracy*. Longer sessions did not fix this: with 10 rounds per
+period (3.5) prices clustered tightly, but around 88–90 rather than P\* = 100, so only 9% of trades counted as
+settled. More rounds produced agreement, not accuracy.
 
 ### 3.5 Effect of the prompt and protocol fixes (10 rounds per period, seed 0)
 

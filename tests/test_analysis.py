@@ -65,3 +65,17 @@ def test_plots_and_diagram_render(results, tmp_path):
     draw_diagram(tmp_path / "arch.png")
     for f in ("eff.png", "split.png", "path.png", "arch.png"):
         assert (tmp_path / f).stat().st_size > 1000
+
+
+def test_convergence_round():
+    from analysis.metrics import _convergence
+    tr = lambda r, p: {"round": r, "price": p}
+    # Off-price trades in rounds 1-2, then every trade within 10% of P* = 100 from round 3 on.
+    assert _convergence([tr(0, 150), tr(1, 60), tr(2, 105), tr(4, 98)], 100, 6) == (3, 2)
+    # Settled from the very first trade.
+    assert _convergence([tr(0, 100), tr(1, 95)], 100, 6) == (1, 2)
+    # Last trade is off: never settled.
+    assert _convergence([tr(0, 100), tr(5, 140)], 100, 6) == (7, 0)
+    # Off and on trades in the same round: settled only from the next round.
+    assert _convergence([tr(2, 150), tr(2, 100), tr(3, 101)], 100, 6) == (4, 1)
+    assert _convergence([], 100, 6) == (7, 0)

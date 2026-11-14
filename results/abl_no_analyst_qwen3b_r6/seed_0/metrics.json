@@ -3,6 +3,8 @@
  "price_rmsd": 28.084375422236878,
  "smith_alpha_last": 26.22022120425379,
  "price_in_band": 0.10714285714285714,
+ "converge_round": 6.333333333333333,
+ "settled_share": 0.07142857142857142,
  "quantity_ratio": 0.8484848484848485,
  "extramarginal": 1,
  "n_trades": 28,
@@ -24,6 +26,8 @@
    "n_trades": 10,
    "eq_quantity": 11,
    "eq_price": 100.0,
+   "converge_round": 6,
+   "settled_trades": 1,
    "smith_alpha": 31.824518849465736
   },
   {
@@ -33,6 +37,8 @@
    "n_trades": 10,
    "eq_quantity": 11,
    "eq_price": 100.0,
+   "converge_round": 6,
+   "settled_trades": 1,
    "smith_alpha": 25.409643838511393
   },
   {
@@ -42,6 +48,8 @@
    "n_trades": 8,
    "eq_quantity": 11,
    "eq_price": 100.0,
+   "converge_round": 7,
+   "settled_trades": 0,
    "smith_alpha": 26.22022120425379
   }
  ],
