@@ -75,7 +75,8 @@ def build_traders(exp: dict, cfg, rng, llm: LLMClient | None):
     return traders
 
 
-def run_one(exp: dict, seed: int, out_root: Path) -> dict:
+def run_one(exp: dict, seed: int, out_root: Path, on_decision=None, on_round=None) -> dict:
+    """Run one seed and write its logs. `on_decision` / `on_round` are passed to the Auctioneer (live UI)."""
     rng = np.random.default_rng(seed)
     cfg = build_market(exp, seed)
     session = exp.get("session", {})
@@ -111,7 +112,8 @@ def run_one(exp: dict, seed: int, out_root: Path) -> dict:
                              rounds_per_period=session.get("rounds_per_period", 10),
                              enforce_budget=session.get("enforce_budget", True),
                              clear_after_trade=session.get("clear_after_trade", True),
-                             max_workers=session.get("max_workers", 8))
+                             max_workers=session.get("max_workers", 8),
+                             on_decision=on_decision, on_round=on_round)
         log = auction.run()
 
     usage = llm.usage.to_dict() if llm else {"calls": 0, "cost_usd": 0.0}

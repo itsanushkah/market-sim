@@ -21,12 +21,17 @@ from market.order_book import Order, OrderBook, Trade
 class Auctioneer:
     def __init__(self, cfg: MarketConfig, traders: list[Trader], bus: MessageBus, rng, analyst=None,
                  n_periods: int = 3, rounds_per_period: int = 10, enforce_budget: bool = True,
-                 clear_after_trade: bool = True, max_workers: int = 8):
+                 clear_after_trade: bool = True, max_workers: int = 8,
+                 on_decision=None, on_round=None):
         self.cfg, self.traders, self.bus, self.rng, self.analyst = cfg, traders, bus, rng, analyst
         self.n_periods, self.rounds = n_periods, rounds_per_period
         self.enforce_budget = enforce_budget
         self.book = OrderBook(clear_after_trade)
         self.max_workers = max_workers
+        # Optional observers for a live UI. Both are called from the thread that called run().
+        #   on_decision(period, round, n_done, n_active, trader, decision)   as each agent's decision arrives
+        #   on_round(period, round, auctioneer)                              after orders are matched
+        self.on_decision, self.on_round = on_decision, on_round
         self.by_id = {t.agent_id: t for t in traders}
         self.trades: list[dict] = []
         self.orders: list[dict] = []
@@ -66,7 +71,11 @@ class Auctioneer:
             return tr.decide(obs)
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
-            decisions = dict(zip([t.agent_id for t in active], pool.map(decide, active)))
+            decisions = {}
+            for tr, d in zip(active, pool.map(decide, active)):
+                decisions[tr.agent_id] = d
+                if self.on_decision:
+                    self.on_decision(period, rnd, len(decisions), len(active), tr, d)
 
         for aid, d in decisions.items():
             # Drop nonsense beliefs (e.g. small models emitting 0) so they can't poison the analyst's consensus.
@@ -118,3 +127,5 @@ class Auctioneer:
 
         if self.analyst:
             self.analyst.observe_round(period, rnd, [t["price"] for t in self.trades])
+        if self.on_round:
+            self.on_round(period, rnd, self)
