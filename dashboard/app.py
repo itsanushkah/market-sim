@@ -8,6 +8,7 @@ runs (never calls a model, so it cannot fail during a demo) and a comparison of 
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -29,6 +30,8 @@ from market.equilibrium import compute_equilibrium
 RESULTS = ROOT / "results"
 FIGS = ROOT / "report" / "figures"
 MODEL = "qwen2.5:3b"
+# Tests set MARKET_SIM_LIVE_BACKEND=mock to exercise the live tab without a model. The demo always uses Ollama.
+LIVE_BACKEND = os.environ.get("MARKET_SIM_LIVE_BACKEND", "ollama")
 
 # Plain-language names for the saved experiments. Anything not listed keeps its raw name.
 FRIENDLY = {
@@ -204,7 +207,7 @@ with tab_live:
                    + f" · units that should trade per period: {e0.quantity} · maximum total gain per period: {e0.max_surplus:g}")
 
     start = st.button("Start live run", type="primary")
-    if start and use_ai and not ollama_ready():
+    if start and use_ai and LIVE_BACKEND == "ollama" and not ollama_ready():
         st.error(f"Ollama is not running or the model `{MODEL}` is missing. Open the Ollama app "
                  f"(or run `ollama pull {MODEL}`) and try again. The Replay tab works without it.")
         start = False
@@ -216,7 +219,7 @@ with tab_live:
                "traders": ({"type": "llm", "personas": "neutral", "memory": True, "chat": False} if use_ai
                            else {"type": "zi_c"}),
                "analyst": {"enabled": bool(analyst_on and use_ai), "mode": "rule"},
-               "llm": {"backend": "ollama", "model": MODEL, "effort": "low", "use_cache": bool(use_cache)}}
+               "llm": {"backend": LIVE_BACKEND, "model": MODEL, "effort": "low", "use_cache": bool(use_cache)}}
         max_total = sum(compute_equilibrium(live_cfg.for_period(p)).max_surplus for p in range(int(n_periods)))
         total_decisions = n_traders * int(n_rounds) * int(n_periods)
         status, bar = st.empty(), st.progress(0.0)

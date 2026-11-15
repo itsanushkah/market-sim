@@ -1,0 +1,105 @@
+{"sender": "B0", "channel": "beliefs", "content": "belief 150.0", "period": 0, "round": 0, "data": {"belief": 150.0}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 140.0", "period": 0, "round": 0, "data": {"belief": 140.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 125.0", "period": 0, "round": 0, "data": {"belief": 125.0}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 100.0", "period": 0, "round": 0, "data": {"belief": 100.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 65.0", "period": 0, "round": 0, "data": {"belief": 65.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 71.0", "period": 0, "round": 0, "data": {"belief": 71.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 109.5; traders disagree by about 58.0 (IQR). Recent trades: [65.0, 150.0].", "period": 0, "round": 0, "data": {"estimate": 109.5, "belief_spread": 58.0}}
+{"sender": "B0", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 1, "data": {"belief": 109.5}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 1, "data": {"belief": 109.5}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 1, "data": {"belief": 109.5}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 1, "data": {"belief": 109.5}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 72.0", "period": 0, "round": 1, "data": {"belief": 72.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 75.0", "period": 0, "round": 1, "data": {"belief": 75.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 86.4; traders disagree by about 25.9 (IQR). Recent trades: [65.0, 150.0, 71.0].", "period": 0, "round": 1, "data": {"estimate": 86.4, "belief_spread": 25.875}}
+{"sender": "B0", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 2, "data": {"belief": 109.5}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 2, "data": {"belief": 109.5}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 76.0", "period": 0, "round": 2, "data": {"belief": 76.0}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 2, "data": {"belief": 109.5}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 2, "data": {"belief": 109.5}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 109.5", "period": 0, "round": 2, "data": {"belief": 109.5}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 96.6; traders disagree by about 0.0 (IQR). Recent trades: [65.0, 150.0, 71.0, 105].", "period": 0, "round": 2, "data": {"estimate": 96.6, "belief_spread": 0.0}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 95.0", "period": 0, "round": 3, "data": {"belief": 95.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 86.0", "period": 0, "round": 3, "data": {"belief": 86.0}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 110.0", "period": 0, "round": 3, "data": {"belief": 110.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 116.0", "period": 0, "round": 3, "data": {"belief": 116.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 93.8; traders disagree by about 18.8 (IQR). Recent trades: [65.0, 150.0, 71.0, 105].", "period": 0, "round": 3, "data": {"estimate": 93.8, "belief_spread": 18.75}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 96.6", "period": 0, "round": 4, "data": {"belief": 96.6}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 96.0", "period": 0, "round": 4, "data": {"belief": 96.0}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 96.6", "period": 0, "round": 4, "data": {"belief": 96.6}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 110.0", "period": 0, "round": 4, "data": {"belief": 110.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 95.64; traders disagree by about 3.5 (IQR). Recent trades: [65.0, 150.0, 71.0, 105, 95.0].", "period": 0, "round": 4, "data": {"estimate": 95.64, "belief_spread": 3.5}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 93.8", "period": 0, "round": 5, "data": {"belief": 93.8}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 95.64", "period": 0, "round": 5, "data": {"belief": 95.64}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 94.89; traders disagree by about 0.9 (IQR). Recent trades: [65.0, 150.0, 71.0, 105, 95.0].", "period": 0, "round": 5, "data": {"estimate": 94.89, "belief_spread": 0.9200000000000159}}
+{"sender": "B0", "channel": "beliefs", "content": "belief 151.0", "period": 1, "round": 0, "data": {"belief": 151.0}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 140.0", "period": 1, "round": 0, "data": {"belief": 140.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 125.0", "period": 1, "round": 0, "data": {"belief": 125.0}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 50.5", "period": 1, "round": 0, "data": {"belief": 50.5}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 61.0", "period": 1, "round": 0, "data": {"belief": 61.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 71.5", "period": 1, "round": 0, "data": {"belief": 71.5}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 96.3; traders disagree by about 72.6 (IQR). Recent trades: [71.0, 105, 95.0, 140.0, 71.0].", "period": 1, "round": 0, "data": {"estimate": 96.3, "belief_spread": 72.625}}
+{"sender": "B0", "channel": "beliefs", "content": "belief 94.89", "period": 1, "round": 1, "data": {"belief": 94.89}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 94.89", "period": 1, "round": 1, "data": {"belief": 94.89}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 94.89", "period": 1, "round": 1, "data": {"belief": 94.89}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 100.0", "period": 1, "round": 1, "data": {"belief": 100.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 94.89", "period": 1, "round": 1, "data": {"belief": 94.89}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 120.0", "period": 1, "round": 1, "data": {"belief": 120.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 94.96; traders disagree by about 3.8 (IQR). Recent trades: [105, 95.0, 140.0, 71.0, 61.0].", "period": 1, "round": 1, "data": {"estimate": 94.96, "belief_spread": 3.832499999999996}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 96.0", "period": 1, "round": 2, "data": {"belief": 96.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 96.3", "period": 1, "round": 2, "data": {"belief": 96.3}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 100.0", "period": 1, "round": 2, "data": {"belief": 100.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 96.3", "period": 1, "round": 2, "data": {"belief": 96.3}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 96.3", "period": 1, "round": 2, "data": {"belief": 96.3}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 95.52; traders disagree by about 0.0 (IQR). Recent trades: [105, 95.0, 140.0, 71.0, 61.0].", "period": 1, "round": 2, "data": {"estimate": 95.52, "belief_spread": 0.0}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 94.0", "period": 1, "round": 3, "data": {"belief": 94.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 94.96", "period": 1, "round": 3, "data": {"belief": 94.96}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 96.3", "period": 1, "round": 3, "data": {"belief": 96.3}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 100.0", "period": 1, "round": 3, "data": {"belief": 100.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 100.0", "period": 1, "round": 3, "data": {"belief": 100.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 95.52; traders disagree by about 5.0 (IQR). Recent trades: [105, 95.0, 140.0, 71.0, 61.0].", "period": 1, "round": 3, "data": {"estimate": 95.52, "belief_spread": 5.040000000000006}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 95.52", "period": 1, "round": 4, "data": {"belief": 95.52}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 95.52", "period": 1, "round": 4, "data": {"belief": 95.52}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 95.0", "period": 1, "round": 4, "data": {"belief": 95.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 95.52", "period": 1, "round": 4, "data": {"belief": 95.52}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 96.3", "period": 1, "round": 4, "data": {"belief": 96.3}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 95.21; traders disagree by about 0.0 (IQR). Recent trades: [95.0, 140.0, 71.0, 61.0, 96.3].", "period": 1, "round": 4, "data": {"estimate": 95.21, "belief_spread": 0.0}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 95.52", "period": 1, "round": 5, "data": {"belief": 95.52}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 96.3", "period": 1, "round": 5, "data": {"belief": 96.3}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 110.0", "period": 1, "round": 5, "data": {"belief": 110.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 116.0", "period": 1, "round": 5, "data": {"belief": 116.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 98.26; traders disagree by about 15.4 (IQR). Recent trades: [95.0, 140.0, 71.0, 61.0, 96.3].", "period": 1, "round": 5, "data": {"estimate": 98.26, "belief_spread": 15.39500000000001}}
+{"sender": "B0", "channel": "beliefs", "content": "belief 95.21", "period": 2, "round": 0, "data": {"belief": 95.21}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 95.21", "period": 2, "round": 0, "data": {"belief": 95.21}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 125.0", "period": 2, "round": 0, "data": {"belief": 125.0}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 55.0", "period": 2, "round": 0, "data": {"belief": 55.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 95.21", "period": 2, "round": 0, "data": {"belief": 95.21}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 95.21", "period": 2, "round": 0, "data": {"belief": 95.21}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 80.68; traders disagree by about 0.0 (IQR). Recent trades: [71.0, 61.0, 96.3, 125.0, 61.0].", "period": 2, "round": 0, "data": {"estimate": 80.68, "belief_spread": 0.0}}
+{"sender": "B0", "channel": "beliefs", "content": "belief 98.26", "period": 2, "round": 1, "data": {"belief": 98.26}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 98.26", "period": 2, "round": 1, "data": {"belief": 98.26}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 98.26", "period": 2, "round": 1, "data": {"belief": 98.26}}
+{"sender": "S0", "channel": "beliefs", "content": "belief 53.0", "period": 2, "round": 1, "data": {"belief": 53.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 108.0", "period": 2, "round": 1, "data": {"belief": 108.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 118.0", "period": 2, "round": 1, "data": {"belief": 118.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 93.3; traders disagree by about 7.3 (IQR). Recent trades: [96.3, 125.0, 61.0, 55.0, 90].", "period": 2, "round": 1, "data": {"estimate": 93.3, "belief_spread": 7.304999999999993}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 95.0", "period": 2, "round": 2, "data": {"belief": 95.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 85.0", "period": 2, "round": 2, "data": {"belief": 85.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 108.0", "period": 2, "round": 2, "data": {"belief": 108.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 117.0", "period": 2, "round": 2, "data": {"belief": 117.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 94.6; traders disagree by about 17.8 (IQR). Recent trades: [96.3, 125.0, 61.0, 55.0, 90].", "period": 2, "round": 2, "data": {"estimate": 94.6, "belief_spread": 17.75}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 95.0", "period": 2, "round": 3, "data": {"belief": 95.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 93.3", "period": 2, "round": 3, "data": {"belief": 93.3}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 108.0", "period": 2, "round": 3, "data": {"belief": 108.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 100.0", "period": 2, "round": 3, "data": {"belief": 100.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 93.0; traders disagree by about 7.4 (IQR). Recent trades: [96.3, 125.0, 61.0, 55.0, 90].", "period": 2, "round": 3, "data": {"estimate": 93.0, "belief_spread": 7.424999999999997}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 94.6", "period": 2, "round": 4, "data": {"belief": 94.6}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 94.6", "period": 2, "round": 4, "data": {"belief": 94.6}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 94.6", "period": 2, "round": 4, "data": {"belief": 94.6}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 100.0", "period": 2, "round": 4, "data": {"belief": 100.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 91.84; traders disagree by about 1.3 (IQR). Recent trades: [96.3, 125.0, 61.0, 55.0, 90].", "period": 2, "round": 4, "data": {"estimate": 91.84, "belief_spread": 1.3499999999999943}}
+{"sender": "B1", "channel": "beliefs", "content": "belief 93.0", "period": 2, "round": 5, "data": {"belief": 93.0}}
+{"sender": "B2", "channel": "beliefs", "content": "belief 93.0", "period": 2, "round": 5, "data": {"belief": 93.0}}
+{"sender": "S1", "channel": "beliefs", "content": "belief 93.0", "period": 2, "round": 5, "data": {"belief": 93.0}}
+{"sender": "S2", "channel": "beliefs", "content": "belief 110.0", "period": 2, "round": 5, "data": {"belief": 110.0}}
+{"sender": "analyst", "channel": "analyst", "content": "Consensus equilibrium estimate: 91.2; traders disagree by about 4.2 (IQR). Recent trades: [96.3, 125.0, 61.0, 55.0, 90].", "period": 2, "round": 5, "data": {"estimate": 91.2, "belief_spread": 4.25}}

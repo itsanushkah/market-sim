@@ -69,7 +69,7 @@ baseline. ± is a 95% interval over seeds; with 3 seeds, treat differences as co
 git clone https://github.com/itsanushkah/market-sim.git && cd market-sim
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-pytest                                   # 24 tests, no model needed
+pytest                                   # 26 tests, no model needed
 ```
 
 Pick an LLM backend with `--backend`:
@@ -97,11 +97,22 @@ python -m analysis.plots                 # report/figures/*.png (mock runs exclu
 python -m analysis.excerpts results/llm_full_qwen3b_v1/seed_0
 python -m analysis.diagram               # architecture figure
 
-# Demo: replays logged runs, never calls a model
+# Demo dashboard: plain-language overview, live run (needs Ollama), replay of saved runs, comparison
 streamlit run dashboard/app.py
 ```
 
 LLM responses are cached in `.llm_cache/`, so re-running a seed costs nothing and gives the same result.
+
+### Demo checklist
+
+The live tab runs the model on your laptop, so speed depends on free memory. On an 8 GB machine one decision
+takes about 10 s when the laptop is fresh, and minutes when memory is full.
+
+1. Restart the laptop, plug it in, and close everything except a terminal, the browser and Ollama.
+2. `ollama run qwen2.5:3b "hi"` once to load the model, then `streamlit run dashboard/app.py`.
+3. In "Run it live", use the small market with 1 period (about 36 decisions, 5–7 minutes), or tick
+   "Reuse saved AI answers" to replay a run you did earlier with the same settings.
+4. If anything goes wrong, the "Replay a saved run" tab needs no model.
 
 ## Experimental conditions
 

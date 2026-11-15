@@ -233,6 +233,22 @@ advantage over ZI-C is in *who trades* (efficiency), not in *price accuracy*. Lo
 period (3.5) prices clustered tightly, but around 88–90 rather than P\* = 100, so only 9% of trades counted as
 settled. More rounds produced agreement, not accuracy.
 
+**Small-market pilot** (TA recommendation). Same protocol on a much smaller market: one good, 3 buyers and
+3 sellers with 2 units each (`market/configs/pilot.yaml`; Q\* = 4, P\* = 95–105, maximum surplus 255 per
+period). Experiments: `experiments/run_pilot.sh`.
+
+| Condition (6 traders, 6 rounds per period) | Seeds | Efficiency | Price RMSD | Buyers' share (P\* share 0.49) | Round at which prices settle |
+|---|---|---|---|---|---|
+| ZI-C | 10 | 0.824 ± 0.031 | 21.3 | 0.49 | 5.4 |
+| LLM, no analyst | 1 (2 more running) | 0.961 | 24.6 | 0.46 | 2.7 |
+| LLM full (analyst + memory) | 1 (2 more running) | 0.987 | 31.5 | 0.64 | 5.0 |
+
+*Preliminary: one LLM seed per condition so far.* The pilot agrees with the 10-trader market on the main point:
+LLM traders capture more of the gains than random traders (0.96–0.99 vs 0.82), with or without the analyst.
+With one seed nothing can be said about the analyst's effect. On this seed the market without the analyst
+settled on the fair price sooner, which is a reminder that the analyst's benefit is not guaranteed and has to be
+checked across seeds. **[Update this paragraph when seeds 1–2 finish.]**
+
 ### 3.5 Effect of the prompt and protocol fixes (10 rounds per period, seed 0)
 
 | | v0 | v1 | ZI-C (10 seeds) |
