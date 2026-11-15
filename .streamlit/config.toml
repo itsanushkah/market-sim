@@ -1,0 +1,4 @@
+# Fixed light theme so the dashboard looks the same on any laptop or projector.
+[theme]
+base = "light"
+primaryColor = "#2a6fdb"

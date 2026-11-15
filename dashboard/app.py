@@ -25,7 +25,7 @@ from analysis.metrics import summarize
 from analysis.plots import load_market_json
 from experiments.runner import run_one
 from market.config import load_market
-from market.equilibrium import compute_equilibrium
+from market.equilibrium import compute_equilibrium, demand_supply
 
 RESULTS = ROOT / "results"
 FIGS = ROOT / "report" / "figures"
@@ -91,8 +91,90 @@ def price_chart(cfg, trades: list[dict], n_periods: int):
     return fig
 
 
+def outcome(o: dict) -> str:
+    if o.get("error"):
+        return "AI gave an unusable answer"
+    if o["action"] == "pass" or o.get("raw_price") is None:
+        return "Sat this round out"
+    if o.get("traded"):
+        return "✅ Traded" + (" (safety rule adjusted the price)" if o.get("clipped") else "")
+    if o.get("clipped"):
+        return "⚠️ Would have lost money; safety rule adjusted the price"
+    return "Offer left waiting"
+
+
 def order_rows(orders: list[dict]) -> list[dict]:
-    return [{label: o.get(k) for k, label in ORDER_COLUMNS.items()} for o in orders]
+    rows = []
+    for o in orders:
+        row = {label: o.get(k) for k, label in ORDER_COLUMNS.items() if k != "traded"}
+        row = {"Trader": row.pop("Trader"), "Result": outcome(o), **row}
+        rows.append(row)
+    return rows
+
+
+def trade_story(trades: list[dict]) -> list[str]:
+    """One plain sentence per trade: who bought from whom, and what each side gained."""
+    out = []
+    for t in trades:
+        b_gain, s_gain = t["buyer_value"] - t["price"], t["price"] - t["seller_cost"]
+        note = "" if t["surplus"] > 0 else " This trade created no benefit."
+        out.append(f"**{t['buyer_id']}** bought from **{t['seller_id']}** at **{t['price']:g}**. "
+                   f"The buyer valued it at {t['buyer_value']:g}, so gained {b_gain:g}; "
+                   f"it cost the seller {t['seller_cost']:g}, so gained {s_gain:g}.{note}")
+    return out
+
+
+def supply_demand_chart(cfg):
+    """The 'staircase' picture: buyers' values from high to low, sellers' costs from low to high."""
+    d, s_ = demand_supply(cfg)
+    e = compute_equilibrium(cfg)
+    fig, ax = plt.subplots(figsize=(5, 3))
+    ax.step(range(len(d) + 1), [d[0]] + d, where="pre", color="#2a6fdb", label="what buyers would pay")
+    ax.step(range(len(s_) + 1), [s_[0]] + s_, where="pre", color="#d9534f", label="what sellers need")
+    ax.axhspan(e.price_low - 2, e.price_high + 2, color="#cfe0ff", label="fair price")
+    ax.axvline(e.quantity, ls=":", color="#888888")
+    ax.set_xlabel("units traded"); ax.set_ylabel("price")
+    ax.legend(frameon=False, fontsize=7)
+    fig.tight_layout()
+    return fig
+
+
+def headline_chart(by_name: dict):
+    names = [n for n in SCOREBOARD if n in by_name]
+    fig, ax = plt.subplots(figsize=(8, 0.45 * len(names) + 0.9))
+    vals = [by_name[n]["efficiency"] for n in names]
+    colors = ["#2a6fdb" if n == "llm_full_qwen3b_r6" else "#9aa5b1" for n in names]
+    ax.barh([friendly(n) for n in names], vals, xerr=[by_name[n]["efficiency_ci95"] for n in names],
+            color=colors, error_kw={"lw": 1, "capsize": 2})
+    for i, v in enumerate(vals):
+        ax.text(0.02, i, f"{v:.0%}", va="center", color="white", fontsize=9, fontweight="bold")
+    ax.set_xlim(0, 1.05); ax.set_xlabel("share of the possible gains from trade that was captured")
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    return fig
+
+
+def verdict(m: dict, base: dict | None) -> str:
+    eff = m["efficiency"]
+    text = f"This run captured **{eff:.0%}** of the possible gains from trade."
+    if base:
+        diff = eff - base["efficiency"]
+        how = "better than" if diff > 0.02 else "worse than" if diff < -0.02 else "about the same as"
+        text += f" That is {how} random traders on the same market, who average {base['efficiency']:.0%}."
+    if m.get("n_trades") and m.get("buyer_share") is not None:
+        gap = m["buyer_share"] - m["buyer_share_ce"]
+        if abs(gap) > 0.08:
+            text += (f" Prices ran {'low' if gap > 0 else 'high'}: buyers took {m['buyer_share']:.0%} of the gains, "
+                     f"against {m['buyer_share_ce']:.0%} at the fair price.")
+        else:
+            text += " Buyers and sellers split the gains about as they would at the fair price."
+    return text
+
+
+def random_baseline(by_name: dict, market: str, rounds: int) -> dict | None:
+    key = {("pilot", 6): "pilot_zi_c_r6", ("symmetric", 6): "baseline_zi_c_r6", ("symmetric", 10): "baseline_zi_c",
+           ("shock", 6): "rob_shock_zi_c_r6", ("shock", 10): "rob_shock_zi_c"}.get((market, rounds))
+    return by_name.get(key) if key else None
 
 
 def secrets_table(cfg) -> list[dict]:
@@ -156,6 +238,15 @@ knowing only its own numbers, did at least as well.
               "Buyers' share of the gains (fair: 48%)": f"{by_name[n]['buyer_share']:.0%}"}
              for n in SCOREBOARD if n in by_name]
     if board:
+        top = [("Random traders", "baseline_zi_c_r6"), ("AI traders, no talking", "abl_no_comms_qwen3b_r6"),
+               ("AI traders + analyst", "llm_full_qwen3b_r6")]
+        for col, (label, key) in zip(st.columns(3), top):
+            if key in by_name:
+                col.metric(label, f"{by_name[key]['efficiency']:.0%}", help="Share of possible gains captured")
+        fig = headline_chart(by_name)
+        st.pyplot(fig); plt.close(fig)
+        st.caption("Thin black lines show the uncertainty across repeats. Main market: 5 buyers, 5 sellers, "
+                   "3 trading days of 6 rounds each.")
         st.dataframe(board, width="stretch", hide_index=True)
         st.caption("\"Gains captured\" = how much of the total possible benefit from trading actually happened. "
                    "100% means every trade that should happen did, and none that shouldn't.")
@@ -201,7 +292,12 @@ with tab_live:
         st.caption(f"About {n_traders * n_rounds * n_periods} AI decisions, roughly "
                    f"{max(1, round(n_traders * n_rounds * n_periods * 11 / 60))} minutes on this laptop.")
     with st.expander("The secret numbers for this market (agents only see their own row)"):
-        st.dataframe(secrets_table(live_cfg), width="stretch", hide_index=True)
+        sc1, sc2 = st.columns([3, 2])
+        sc1.dataframe(secrets_table(live_cfg), width="stretch", hide_index=True)
+        fig = supply_demand_chart(live_cfg)
+        sc2.pyplot(fig); plt.close(fig)
+        sc2.caption("Line up buyers from most to least eager and sellers from cheapest to dearest. "
+                    "Where the two staircases cross is the fair price.")
         e0 = compute_equilibrium(live_cfg)
         st.caption(f"Fair price: {e0.price_low:g}" + (f" to {e0.price_high:g}" if e0.price_high != e0.price_low else "")
                    + f" · units that should trade per period: {e0.quantity} · maximum total gain per period: {e0.max_surplus:g}")
@@ -230,6 +326,7 @@ with tab_live:
         col_feed.markdown("**Latest decisions**")
         feed = col_feed.empty()
         col_table.markdown("**Last completed round**")
+        story = col_table.empty()
         table = col_table.empty()
         recent: list[str] = []
         t_start = time.time()
@@ -253,6 +350,8 @@ with tab_live:
             m_gain.metric("Gains captured so far", f"{gained / max_total:.0%}" if max_total else "-")
             if auc.analyst and auc.analyst.last_estimate is not None:
                 m_analyst.metric("Analyst's price estimate", f"{auc.analyst.last_estimate:g}")
+            told = trade_story([t for t in auc.trades if t["period"] == period and t["round"] == rnd])
+            story.markdown("\n\n".join(told) if told else "*No trade this round: no buyer's price met a seller's price.*")
             table.dataframe(order_rows([o for o in auc.orders if o["period"] == period and o["round"] == rnd]),
                             width="stretch", hide_index=True)
 
@@ -280,6 +379,7 @@ with tab_live:
             fig = price_chart(cfg_done, done_trades, len(m["per_period"]))
             st.pyplot(fig); plt.close(fig)
         base = by_name.get("pilot_zi_c_r6" if res["market"] == "pilot" else "baseline_zi_c_r6")
+        st.markdown(verdict(m, base if res["ai"] else None))
         if base and res["ai"]:
             st.caption(f"For comparison, random traders capture {base['efficiency']:.0%} on this market on average "
                        f"(6 rounds per period, {base['n_seeds']} runs). One live run is a single repeat, so it can land "
@@ -321,6 +421,10 @@ with tab_replay:
                   help=f"At the fair price it would be {metrics.get('buyer_share_ce', float('nan')):.0%}.")
         m5.metric("AI decisions", metrics.get("llm_calls", 0))
 
+        rounds_here = run_cfg.get("session", {}).get("rounds_per_period", 10)
+        is_baseline = metrics.get("backend") in (None, "none")
+        st.markdown(verdict(metrics, None if is_baseline else random_baseline(by_name, cfg.name, rounds_here)))
+
         if trades:
             step = st.slider("Drag to replay trade by trade", 1, len(trades), len(trades)) if len(trades) > 1 else 1
             shown = trades[:step]
@@ -329,7 +433,10 @@ with tab_replay:
             st.caption("Each dot is one trade. The shaded band is the fair price, which the agents cannot see. "
                        "Dots inside the band mean the market found the right price.")
             cur = shown[-1]
-            st.subheader(f"What every trader did in period {cur['period'] + 1}, round {cur['round'] + 1}")
+            st.subheader(f"Period {cur['period'] + 1}, round {cur['round'] + 1}: what happened")
+            for line in trade_story([t for t in shown if t["period"] == cur["period"] and t["round"] == cur["round"]]):
+                st.markdown(line)
+            st.markdown("**What every trader did this round**")
             st.dataframe(order_rows([o for o in orders if o["period"] == cur["period"] and o["round"] == cur["round"]]),
                          width="stretch", hide_index=True)
             said = [m for m in msgs if m["period"] == cur["period"] and m["round"] <= cur["round"]
@@ -341,7 +448,10 @@ with tab_replay:
         else:
             st.warning("This run produced no trades.")
         with st.expander("The secret numbers for this market"):
-            st.dataframe(secrets_table(cfg), width="stretch", hide_index=True)
+            sc1, sc2 = st.columns([3, 2])
+            sc1.dataframe(secrets_table(cfg), width="stretch", hide_index=True)
+            fig = supply_demand_chart(cfg)
+            sc2.pyplot(fig); plt.close(fig)
 
 # ---------------------------------------------------------------------------------------------------------
 with tab_compare:
