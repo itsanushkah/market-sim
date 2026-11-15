@@ -111,11 +111,11 @@ LLM responses are cached in `.llm_cache/`, so re-running a seed costs nothing an
 ### Demo checklist
 
 The live tab runs the model on your laptop, so speed depends on free memory. On an 8 GB machine one decision
-takes about 10 s when the laptop is fresh, and minutes when memory is full.
+takes 10-16 s when the laptop is fresh, and minutes when memory is full.
 
 1. Restart the laptop, plug it in, and close everything except a terminal, the browser and Ollama.
 2. `ollama run qwen2.5:3b "hi"` once to load the model, then `streamlit run dashboard/app.py`.
-3. In "Run it live", use the small market with 1 period (about 36 decisions, 5–7 minutes), or tick
+3. In "Run it live", use the small market with 1 period and 4 rounds (24 decisions, about 6 minutes), or tick
    "Reuse saved AI answers" to replay a run you did earlier with the same settings.
 4. If anything goes wrong, the "Replay a saved run" tab needs no model.
 

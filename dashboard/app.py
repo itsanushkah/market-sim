@@ -279,7 +279,7 @@ with tab_live:
                            help="Turn it off to see the market without the coordinating agent.")
     c4, c5, c6, c7 = st.columns(4)
     n_periods = c4.number_input("Periods (trading days)", 1, 3, 1)
-    n_rounds = c5.number_input("Rounds per period", 2, 10, 6)
+    n_rounds = c5.number_input("Rounds per period", 2, 10, 4)
     seed = c6.number_input("Seed (run number)", 0, 999, 0,
                            help="Change it to get a different repeat of the same experiment.")
     use_cache = c7.checkbox("Reuse saved AI answers", value=False, disabled=not use_ai,
@@ -290,7 +290,7 @@ with tab_live:
     n_traders = len(live_cfg.traders)
     if use_ai:
         st.caption(f"About {n_traders * n_rounds * n_periods} AI decisions, roughly "
-                   f"{max(1, round(n_traders * n_rounds * n_periods * 11 / 60))} minutes on this laptop.")
+                   f"{max(1, round(n_traders * n_rounds * n_periods * 15 / 60))} minutes on this laptop.")
     with st.expander("The secret numbers for this market (agents only see their own row)"):
         sc1, sc2 = st.columns([3, 2])
         sc1.dataframe(secrets_table(live_cfg), width="stretch", hide_index=True)
