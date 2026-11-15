@@ -1,0 +1,40 @@
+{
+ "calls": 96,
+ "cache_hits": 6,
+ "failures": 0,
+ "input_tokens": 45848,
+ "output_tokens": 11412,
+ "cost_usd": 0.0,
+ "by_agent": {
+  "B0": {
+   "calls": 13,
+   "input_tokens": 5969,
+   "output_tokens": 1514
+  },
+  "B1": {
+   "calls": 16,
+   "input_tokens": 7718,
+   "output_tokens": 2030
+  },
+  "B2": {
+   "calls": 18,
+   "input_tokens": 8668,
+   "output_tokens": 2325
+  },
+  "S0": {
+   "calls": 13,
+   "input_tokens": 6131,
+   "output_tokens": 1390
+  },
+  "S1": {
+   "calls": 18,
+   "input_tokens": 8682,
+   "output_tokens": 2029
+  },
+  "S2": {
+   "calls": 18,
+   "input_tokens": 8680,
+   "output_tokens": 2124
+  }
+ }
+}

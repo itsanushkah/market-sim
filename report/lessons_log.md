@@ -52,3 +52,10 @@
 - With seed 0 alone the analyst looked useless (0.922 vs 0.917 without it). With 3 seeds the ordering is clear: no comms 0.865, no analyst 0.888, full 0.945. Lesson: don't revise a story on one seed in either direction.
 - The analyst pulls the surplus split toward competitive (0.43 vs 0.60 without), but agents with an analyst attempt ~3× more loss-making orders. The budget constraint absorbs those, so the analyst's gain partly relies on it.
 - Bug found while regenerating excerpts: `analysis/excerpts.py` assumed 10 rounds when looking up the previous period's analyst estimate. Fixed to use the last logged round.
+
+## 2026-11-15: TA feedback, pilot market, convergence, demo
+
+- TA approved the topic and asked for: a clearer analyst role, with/without-analyst tests, metrics beyond price accuracy, and a small pilot.
+- Pilot (6 traders): AI traders beat ZI-C (0.96 vs 0.82), but the analyst makes no difference (0.959 vs 0.965). The analyst's benefit showed only in the 10-trader market.
+- New convergence metric: no condition reliably settles within 10% of P* in 6 rounds. Efficiency and price accuracy are different things.
+- Laptop lesson: with swap full and on battery, one model call took minutes instead of ~10 s (two pilot runs took 4.5 and 6.5 h; the same runs took ~20 min after memory freed up). Restart and plug in before any demo.

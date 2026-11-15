@@ -60,3 +60,22 @@ pilot_llm_full_qwen3b_r6     seed=0  eff=0.987  rmsd=31.46  trades=13  cost=$0.0
 pilot_no_analyst_qwen3b_r6   seed=0  eff=0.961  rmsd=24.59  trades=14  cost=$0.000
 === 2026-11-15 00:54:35 start pilot_llm_full_qwen3b_r6 seed 1
   period 1/3: 4 trades, prices [65.0, 140.0, 125.0, 95]
+  period 2/3: 5 trades, prices [100.0, 125.0, 71.0, 110.0, 105.0]
+  period 3/3: 4 trades, prices [51.0, 63.0, 71.0, 105]
+pilot_llm_full_qwen3b_r6     seed=1  eff=0.935  rmsd=27.32  trades=13  cost=$0.000
+=== 2026-11-15 01:18:06 start pilot_no_analyst_qwen3b_r6 seed 1
+  period 1/3: 5 trades, prices [65.0, 140.0, 125.0, 95.0, 105]
+  period 2/3: 4 trades, prices [55.0, 125.0, 110.0, 60.0]
+  period 3/3: 5 trades, prices [51.0, 71.0, 71.0, 95.0, 106.0]
+pilot_no_analyst_qwen3b_r6   seed=1  eff=0.974  rmsd=29.27  trades=14  cost=$0.000
+=== 2026-11-15 01:36:07 start pilot_llm_full_qwen3b_r6 seed 2
+  period 1/3: 4 trades, prices [150.0, 100.0, 71.0, 110]
+  period 2/3: 4 trades, prices [140.0, 150.0, 61.0, 90.5]
+  period 3/3: 5 trades, prices [68.0, 68.0, 105, 71.0, 115]
+pilot_llm_full_qwen3b_r6     seed=2  eff=0.954  rmsd=30.75  trades=13  cost=$0.000
+=== 2026-11-15 01:57:25 start pilot_no_analyst_qwen3b_r6 seed 2
+  period 1/3: 5 trades, prices [150.0, 100.0, 71.0, 95.0, 125.0]
+  period 2/3: 5 trades, prices [125.0, 65.0, 105.5, 116.0, 100.0]
+  period 3/3: 4 trades, prices [85.0, 75.0, 125.0, 90]
+pilot_no_analyst_qwen3b_r6   seed=2  eff=0.961  rmsd=23.46  trades=14  cost=$0.000
+=== 2026-11-15 08:38:13 pilot finished

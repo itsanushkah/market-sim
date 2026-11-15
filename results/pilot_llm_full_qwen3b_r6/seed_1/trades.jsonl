@@ -1,0 +1,13 @@
+{"buyer_id": "B0", "seller_id": "S1", "price": 65.0, "period": 0, "round": 0, "seq": 0, "buyer_value": 150, "seller_cost": 60, "surplus": 90}
+{"buyer_id": "B1", "seller_id": "S2", "price": 140.0, "period": 0, "round": 1, "seq": 1, "buyer_value": 140, "seller_cost": 70, "surplus": 70}
+{"buyer_id": "B2", "seller_id": "S0", "price": 125.0, "period": 0, "round": 2, "seq": 2, "buyer_value": 125, "seller_cost": 50, "surplus": 75}
+{"buyer_id": "B1", "seller_id": "S0", "price": 95, "period": 0, "round": 4, "seq": 3, "buyer_value": 95, "seller_cost": 90, "surplus": 5}
+{"buyer_id": "B1", "seller_id": "S0", "price": 100.0, "period": 1, "round": 0, "seq": 4, "buyer_value": 140, "seller_cost": 50, "surplus": 90}
+{"buyer_id": "B2", "seller_id": "S1", "price": 125.0, "period": 1, "round": 0, "seq": 5, "buyer_value": 125, "seller_cost": 60, "surplus": 65}
+{"buyer_id": "B2", "seller_id": "S2", "price": 71.0, "period": 1, "round": 1, "seq": 6, "buyer_value": 85, "seller_cost": 70, "surplus": 15}
+{"buyer_id": "B0", "seller_id": "S1", "price": 110.0, "period": 1, "round": 2, "seq": 7, "buyer_value": 150, "seller_cost": 105, "surplus": 45}
+{"buyer_id": "B0", "seller_id": "S0", "price": 105.0, "period": 1, "round": 4, "seq": 8, "buyer_value": 110, "seller_cost": 90, "surplus": 20}
+{"buyer_id": "B0", "seller_id": "S0", "price": 51.0, "period": 2, "round": 1, "seq": 9, "buyer_value": 150, "seller_cost": 50, "surplus": 100}
+{"buyer_id": "B2", "seller_id": "S1", "price": 63.0, "period": 2, "round": 2, "seq": 10, "buyer_value": 125, "seller_cost": 60, "surplus": 65}
+{"buyer_id": "B0", "seller_id": "S2", "price": 71.0, "period": 2, "round": 4, "seq": 11, "buyer_value": 110, "seller_cost": 70, "surplus": 40}
+{"buyer_id": "B1", "seller_id": "S1", "price": 105, "period": 2, "round": 5, "seq": 12, "buyer_value": 140, "seller_cost": 105, "surplus": 35}

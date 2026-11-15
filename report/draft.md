@@ -240,14 +240,18 @@ period). Experiments: `experiments/run_pilot.sh`.
 | Condition (6 traders, 6 rounds per period) | Seeds | Efficiency | Price RMSD | Buyers' share (P\* share 0.49) | Round at which prices settle |
 |---|---|---|---|---|---|
 | ZI-C | 10 | 0.824 ± 0.031 | 21.3 | 0.49 | 5.4 |
-| LLM, no analyst | 1 (2 more running) | 0.961 | 24.6 | 0.46 | 2.7 |
-| LLM full (analyst + memory) | 1 (2 more running) | 0.987 | 31.5 | 0.64 | 5.0 |
+| LLM, no analyst | 3 | 0.965 ± 0.009 | 25.8 | 0.52 | 4.4 |
+| LLM full (analyst + memory) | 3 | 0.959 ± 0.030 | 29.8 | 0.58 | 4.7 |
 
-*Preliminary: one LLM seed per condition so far.* The pilot agrees with the 10-trader market on the main point:
-LLM traders capture more of the gains than random traders (0.96–0.99 vs 0.82), with or without the analyst.
-With one seed nothing can be said about the analyst's effect. On this seed the market without the analyst
-settled on the fair price sooner, which is a reminder that the analyst's benefit is not guaranteed and has to be
-checked across seeds. **[Update this paragraph when seeds 1–2 finish.]**
+The pilot agrees with the 10-trader market on the main point: LLM traders capture more of the gains than random
+traders (0.96 vs 0.82), and every LLM seed beats the ZI-C average. It disagrees on the analyst: in the small
+market the analyst makes no measurable difference (0.959 with, 0.965 without; per-seed 0.987 / 0.935 / 0.954 vs
+0.961 / 0.974 / 0.961), and prices settle no sooner with it. A plausible reason is that with only 6 traders and
+4 units to trade there is little dispersed information to aggregate: a trader learns almost as much from the few
+quotes it sees as from a consensus of five other guesses. The analyst's benefit in 3.4 (0.945 vs 0.888) appeared
+with 10 traders and 11 units. So the evidence so far is that the coordinating agent helps more as the market
+grows, which would need a third, larger market to confirm. As in the larger market, agents with the analyst
+attempted more loss-making orders (17% vs 11%).
 
 ### 3.5 Effect of the prompt and protocol fixes (10 rounds per period, seed 0)
 

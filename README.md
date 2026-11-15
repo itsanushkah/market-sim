@@ -28,6 +28,11 @@ baseline. ± is a 95% interval over seeds; with 3 seeds, treat differences as co
 - **The analyst helps, but leans on a safety net.** With the analyst, agents tried nearly three times as many
   loss-making orders (14% vs 5%), pricing toward the consensus past their own value. The budget constraint
   blocked these.
+- **In a smaller market the analyst stops mattering.** On a 6-trader pilot market, AI traders still beat random
+  ones (0.96 vs 0.82), but efficiency is the same with and without the analyst (0.959 vs 0.965). The analyst
+  seems to earn its place only when there is more scattered information to combine.
+- **Prices do not settle within 6 rounds in any condition.** The AI market's advantage is in who trades, not in
+  price accuracy.
 - **Prompt and protocol fixes turned a losing market into a near-perfect one** (seed 0, 10 rounds per period). Efficiency rose
   from **0.817 to 0.986**, above every one of 10 random-trader (ZI-C) seeds (mean 0.889). The fixes: filtering
   nonsense price beliefs, showing agents the profit arithmetic, and warning that the analyst can be wrong.
