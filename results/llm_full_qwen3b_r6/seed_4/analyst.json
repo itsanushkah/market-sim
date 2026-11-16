@@ -1,0 +1,128 @@
+[
+ {
+  "period": 0,
+  "round": 0,
+  "estimate": 72.6,
+  "spread": 68.0,
+  "n_beliefs": 10
+ },
+ {
+  "period": 0,
+  "round": 1,
+  "estimate": 59.64,
+  "spread": 0.0,
+  "n_beliefs": 10
+ },
+ {
+  "period": 0,
+  "round": 2,
+  "estimate": 62.64,
+  "spread": 0.4749999999999943,
+  "n_beliefs": 10
+ },
+ {
+  "period": 0,
+  "round": 3,
+  "estimate": 71.2,
+  "spread": 4.5,
+  "n_beliefs": 10
+ },
+ {
+  "period": 0,
+  "round": 4,
+  "estimate": 81.0,
+  "spread": 24.125,
+  "n_beliefs": 10
+ },
+ {
+  "period": 0,
+  "round": 5,
+  "estimate": 83.4,
+  "spread": 13.799999999999997,
+  "n_beliefs": 9
+ },
+ {
+  "period": 1,
+  "round": 0,
+  "estimate": 83.4,
+  "spread": 10.5,
+  "n_beliefs": 10
+ },
+ {
+  "period": 1,
+  "round": 1,
+  "estimate": 84.36,
+  "spread": 64.1,
+  "n_beliefs": 10
+ },
+ {
+  "period": 1,
+  "round": 2,
+  "estimate": 111.74,
+  "spread": 46.599999999999994,
+  "n_beliefs": 10
+ },
+ {
+  "period": 1,
+  "round": 3,
+  "estimate": 112.87,
+  "spread": 15.64,
+  "n_beliefs": 10
+ },
+ {
+  "period": 1,
+  "round": 4,
+  "estimate": 97.25,
+  "spread": 10.120000000000005,
+  "n_beliefs": 10
+ },
+ {
+  "period": 1,
+  "round": 5,
+  "estimate": 97.65,
+  "spread": 0.75,
+  "n_beliefs": 10
+ },
+ {
+  "period": 2,
+  "round": 0,
+  "estimate": 97.23,
+  "spread": 36.212500000000006,
+  "n_beliefs": 10
+ },
+ {
+  "period": 2,
+  "round": 1,
+  "estimate": 125.0,
+  "spread": 7.625,
+  "n_beliefs": 10
+ },
+ {
+  "period": 2,
+  "round": 2,
+  "estimate": 112.6,
+  "spread": 17.5,
+  "n_beliefs": 10
+ },
+ {
+  "period": 2,
+  "round": 3,
+  "estimate": 111.04,
+  "spread": 12.375,
+  "n_beliefs": 10
+ },
+ {
+  "period": 2,
+  "round": 4,
+  "estimate": 108.02,
+  "spread": 0.09999999999999432,
+  "n_beliefs": 10
+ },
+ {
+  "period": 2,
+  "round": 5,
+  "estimate": 107.42,
+  "spread": 2.9849999999999994,
+  "n_beliefs": 10
+ }
+]

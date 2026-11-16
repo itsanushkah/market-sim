@@ -59,3 +59,12 @@
 - Pilot (6 traders): AI traders beat ZI-C (0.96 vs 0.82), but the analyst makes no difference (0.959 vs 0.965). The analyst's benefit showed only in the 10-trader market.
 - New convergence metric: no condition reliably settles within 10% of P* in 6 rounds. Efficiency and price accuracy are different things.
 - Laptop lesson: with swap full and on battery, one model call took minutes instead of ~10 s (two pilot runs took 4.5 and 6.5 h; the same runs took ~20 min after memory freed up). Restart and plug in before any demo.
+
+## 2026-11-15 (evening): seeds 3 and 4 for full system and no analyst
+
+- Four more runs (25 to 40 min each, plugged in). Full system 0.946 ± 0.028 (5 seeds), no analyst 0.861 ± 0.047.
+  The normal-approximation intervals no longer overlap; Welch t ≈ 3.0, p ≈ 0.02 (computed by hand from per-seed values).
+- Two 3-seed stories did not survive. "Each layer adds efficiency" is wrong: belief sharing alone (0.861) is no
+  better than no communication (0.865, still 3 seeds); the gain comes from the analyst. And "the analyst makes the
+  split fairer" weakened: buyers' share is 0.49 ± 0.09 with it vs 0.56 ± 0.05 without, overlapping.
+- Loss attempts held up: 13.1% with the analyst vs 5.5% without.

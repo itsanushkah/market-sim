@@ -19,3 +19,4 @@ report/figures/*.png
 !report/figures/efficiency_by_period.png
 !results/pilot.log
 !report/figures/convergence_by_round.png
+!results/more_seeds.log
