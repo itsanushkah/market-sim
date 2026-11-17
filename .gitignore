@@ -20,3 +20,7 @@ report/figures/*.png
 !results/pilot.log
 !report/figures/convergence_by_round.png
 !results/more_seeds.log
+!report/figures/main_results.png
+!report/figures/supply_demand_symmetric.png
+!report/figures/price_paths_llm_full_qwen3b_r6.png
+report/report.html

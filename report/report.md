@@ -1,9 +1,79 @@
-# Report draft: design and evaluation sections
-
-> Working draft. All numbers come from `results/summary.csv` after the overnight runs
-> (`experiments/run_laptop_plan.sh`, finished 2026-11-10). Rewrite in your own voice; sections 1 (problem) and 4 (lessons) are not drafted here.
-
 ---
+title: "Can LLM Agents with Private Information Find the Market Price?"
+subtitle: "A multi-agent market simulation with a coordinating analyst agent"
+---
+
+<div class="titleblock">
+<p class="course">CMPSC 448 Final Project: Multi-Agent AI for Solving Real-World Problems</p>
+<p><strong>Team leader:</strong> Anushka Shrivastava (individual project)</p>
+<p><strong>Code:</strong> github.com/itsanushkah/market-sim &nbsp;·&nbsp; <strong>Demo:</strong> Streamlit dashboard (<code>streamlit run dashboard/app.py</code>)</p>
+<p>December 2026</p>
+</div>
+
+**Abstract.** Markets are a real-world case where the information needed to make a good decision is split
+across many parties: each buyer knows only what a good is worth to them and each seller only what it costs
+them, and nobody sees the whole supply and demand picture. We build a multi-agent system in which ten
+LLM trader agents (a local 3B-parameter model, qwen2.5:3b) trade one good in a continuous double auction,
+and a separate analyst agent collects their conflicting price estimates and broadcasts a consensus. Because
+the competitive equilibrium of each simulated market is known exactly, we can measure how much of the
+possible gains from trade the agents capture (allocative efficiency), how close prices get to equilibrium, and
+how quickly. Over 5 independent runs the full system reaches 0.946 ± 0.028 efficiency, against 0.773 for
+random budget-constrained traders, 0.861 without the analyst and 0.926 for a single LLM that is given every
+trader's private information and asked to set the price. The analyst is the component that makes the
+difference (Welch t ≈ 3.0, p ≈ 0.02 against the no-analyst ablation), but only in the 10-trader market: in a
+6-trader pilot market it adds nothing. The agents trade the right units but do not settle on the right price
+within a session, and the analyst makes them try more than twice as many loss-making orders. We report
+these trade-offs together with the failures we found and fixed along the way.
+
+## 1. Problem and why a multi-agent design
+
+### 1.1 The problem: price discovery with private information
+
+Every market has to answer the same question: at what price should a good change hands, and who should
+trade? Economics gives a clean answer, the *competitive equilibrium*: the price P\* at which the quantity
+buyers want equals the quantity sellers offer. At P\* every unit that is worth more to a buyer than it costs a
+seller gets traded, and no other unit does, so the total gain from trade (the *surplus*) is as large as it can
+be. The difficulty is that nobody can compute P\* directly. It depends on every buyer's private value and every
+seller's private cost, and those are spread across many people who have reasons not to reveal them.
+
+Real markets solve this by interaction: people post bids and asks, watch what trades, and adjust. The same
+problem appears wherever decisions depend on information that is distributed and private: setting prices in
+online marketplaces and ad auctions, allocating cloud computing or electricity, or matching supply and demand in
+procurement. As LLM agents start to act for people in such settings (shopping agents, negotiation agents,
+procurement bots), it becomes a practical question whether a population of them, each knowing only its
+owner's information, can reach good collective outcomes, and what kind of coordination helps them get there.
+
+We study this question in a controlled setting where the right answer is known. Each simulated market is
+defined by step supply and demand curves (Figure 1), so P\*, the equilibrium quantity Q\* and the maximum
+surplus are computed exactly, and every outcome can be scored against ground truth.
+
+![Figure 1. Supply and demand in the main (symmetric) market. Five buyers and five sellers each hold three units. The curves cross at Q* = 11 units and P* = 100; the maximum total surplus per period is 600. No agent sees these curves.](figures/supply_demand_symmetric.png){width=55%}
+
+### 1.2 Why a multi-agent system
+
+The problem is multi-agent by construction rather than by choice of architecture:
+
+1. **Information is decentralized.** Each trader holds private information that no other component has. A
+   single agent can only solve the problem if someone first collects all private values and costs, which in a
+   real market nobody can do (people would misreport them, and collecting them is the hard part).
+2. **Agents have conflicting goals.** Buyers want low prices and sellers want high ones. Each agent acts for
+   its own owner, so the system must produce a good *collective* outcome from self-interested parts.
+3. **Coordination is the object of study.** The market mechanism (order book) and the analyst agent are
+   coordination devices. A multi-agent design lets us switch each one on and off and measure its effect.
+4. **There is a single-agent alternative to compare against.** We give one LLM *all* the private information
+   and ask it to set the clearing price. If the decentralized system matches or beats it while no agent sees
+   the whole market, that is direct evidence that splitting the problem across agents helps.
+
+### 1.3 Research questions
+
+- **RQ1.** Do LLM trader agents with private information reach efficient outcomes, and how do they compare with
+  zero-intelligence random traders (a classic baseline from experimental economics)?
+- **RQ2.** Which coordination mechanisms matter? In particular, does an analyst agent that aggregates the
+  traders' conflicting price estimates improve the outcome, and does that depend on market size?
+- **RQ3.** Beyond efficiency: how close do prices get to P\*, how quickly do they converge, and who captures the
+  surplus (buyers or sellers)?
+- **RQ4.** How does the decentralized system compare with a single centralized LLM that sees everything?
+
 
 ## 2. System design and implementation
 
@@ -16,7 +86,9 @@ equilibrium can only be discovered through interaction. A separate analyst agent
 traders' (often conflicting) estimates of the equilibrium price and broadcasts a single consensus estimate,
 which is the main coordination mechanism we study.
 
-Figure 1 (`report/figures/architecture.png`) shows the components and the information flow between them.
+Figure 2 shows the components and the information flow between them.
+
+![Figure 2. System architecture. Traders send orders to the auctioneer and post price beliefs on the message bus; the analyst aggregates beliefs and recent trade prices into a consensus estimate that every trader reads in the next round.](figures/architecture.png)
 
 ### 2.2 Agents and roles
 
@@ -99,7 +171,7 @@ Recent trades: [...]". Traders read it the next round and are told it "is a summ
 and may be wrong". Every estimate, spread and number of beliefs used is logged in `analyst.json`.
 
 *Known weakness.* The analyst can only be as good as its inputs. If most traders share the same wrong belief,
-the median is wrong too, and broadcasting it reinforces the error (the herding episode in 2.5). An LLM analyst
+the median is wrong too, and broadcasting it reinforces the error (the herding episode in 2.5 and Section 4). An LLM analyst
 variant (`analyst_llm`) receives the same inputs and writes the estimate itself; it is implemented but not
 included in the reported runs.
 
@@ -121,16 +193,17 @@ agent order, and a free mock backend used only for tests.
 
 ### 2.6 Implementation details
 
-- Python 3.11, about 2,000 lines across `market/`, `agents/`, `comms/`, `llm/`, `experiments/`, `analysis/`,
-  `dashboard/` and `tests/`. 24 unit and end-to-end tests (market, agents, runner, analysis pipeline) run without a model.
+- Python 3.11, about 2,600 lines across `market/`, `agents/`, `comms/`, `llm/`, `experiments/`, `analysis/`,
+  `dashboard/` and `tests/`. 26 unit and end-to-end tests (market, agents, runner, analysis pipeline, dashboard) run without a model.
 - LLM backends: local open-weight model through Ollama (qwen2.5:3b, used for all reported results because of
   budget), the Claude API (implemented, not used for results) and the mock backend.
 - Each run writes its config, market, every order (with the agent's reasoning), trades, bus messages, analyst
   history, LLM usage and metrics to `results/<experiment>/seed_<k>/`.
-- A Streamlit dashboard replays any logged run step by step (prices, each round's decisions, messages) without
-  calling a model, so the demo cannot fail on the network.
-
----
+- A Streamlit dashboard (`dashboard/app.py`) is used for the demo. It has four tabs: a plain-language
+  explanation with the headline results; a **live run** that starts a small market on the local model and shows
+  each agent's decision, reasoning and every trade as it happens (about 15 s per decision, so a 24-decision demo
+  takes about 6 minutes); a **replay** of any logged run round by round, which needs no model and cannot fail;
+  and a comparison of all conditions.
 
 ## 3. Evaluation
 
@@ -173,7 +246,8 @@ truth.
   no memory, no chat; agents interact only through the order book).
 
 **Protocol.** Model qwen2.5:3b through Ollama on an 8 GB MacBook Air. Main comparison: 3 periods × 6 rounds,
-seeds 0–2 for LLM conditions, seeds 0–9 for baselines (they are free). Earlier prompt-development runs used
+seeds 0–4 for the full system and the no-analyst ablation, seeds 0–2 for the other LLM conditions, seeds 0–9
+for the random baselines (they cost nothing to run). Earlier prompt-development runs used
 10 rounds per period and are reported separately in 3.5 because session length changes efficiency (ZI-C: 0.889
 at 10 rounds vs 0.773 at 6).
 
@@ -201,8 +275,9 @@ as wide with 5 seeds and about twice as wide with 3). Per-seed efficiency: LLM f
 | Anchored on the analyst's estimate | 13.7% | n/a | n/a |
 | Accepted the opposite quote at a profit | 12.2% | 10.2% | 10.1% |
 
-Figures: `efficiency_by_condition.png`, `efficiency_by_period.png`, `rmsd_by_condition.png`,
-`surplus_split.png`, `price_paths_*.png`.
+![Figure 3. Allocative efficiency by condition (mean ± 95% CI over seeds; n = number of independent runs). Left: main 10-trader market. Right: 6-trader pilot market. Green = full multi-agent system; grey = baselines.](figures/main_results.png)
+
+![Figure 4. Efficiency in each of the three periods of a session. The full system stays above 0.94 in every period; the ablations drift between 0.80 and 0.93.](figures/efficiency_by_period.png){width=62%}
 
 Every LLM condition beats ZI-C on average at the same session length (0.861–0.946 vs 0.773), and every LLM
 seed is above the ZI-C mean. The gain from coordination comes from the analyst, not from sharing beliefs alone:
@@ -219,7 +294,9 @@ consensus even when it lies beyond their own value or cost. The budget constrain
 the analyst's benefit depends on that safety net. Price RMSD is higher for all LLM conditions than for ZI-C
 (about 30 vs 22), because LLM agents open each period with extreme quotes (41, 160) that sometimes trade.
 
-**Convergence speed.** Efficiency and price convergence turn out to be different things here.
+**Convergence speed.** Efficiency and price convergence turn out to be different things here (Figure 5).
+
+![Figure 5. Mean distance of trade prices from P* in each round of a period, pooled over periods and seeds. LLM traders open far from equilibrium and close most of the gap by round 3; random traders without the budget constraint (ZI-U) never converge.](figures/convergence_by_round.png){width=62%}
 
 | Condition | Round at which prices settle (of 6; 7 = never) | Trades made after settling | Mean \|price − P\*\| in rounds 1–2 → 5–6 |
 |---|---|---|---|
@@ -271,7 +348,7 @@ attempted more loss-making orders (17% vs 11%).
 | Orders anchored on the analyst's estimate | 17.9% | 23.7% | |
 | Wall time | 2.7 h | 3.9 h | seconds |
 
-(Figure: `prompt_fix_before_after.png`.)
+![Figure 6. Trade prices before (v0) and after (v1) the prompt and protocol fixes, same seed; dashed line = P*. Before: prices swing widely and period 3 collapses (efficiency 0.57). After: efficient in every period, but prices settle tightly around 88–90 rather than 100.](figures/prompt_fix_before_after.png)
 
 The fixes removed the period-3 collapse and raised efficiency above every ZI-C seed. They also made agents rely
 more on the analyst: prices converged tightly, but to about 88–90 rather than P\* = 100, and buyers captured
@@ -294,7 +371,7 @@ claim is "at least as good, with no agent seeing the whole market", not "clearly
 
 ### 3.7 Qualitative observations
 
-From `report/excerpts/`:
+From the logged reasoning of every order (`report/excerpts/`):
 
 - Agents often cite the analyst's estimate and price within a few units of it, even when their own value
   implies a very different price.
@@ -306,7 +383,103 @@ From `report/excerpts/`:
 ### 3.8 Threats to validity
 
 - Small model (3B parameters); results may not transfer to stronger models.
-- Few seeds for LLM conditions (3) because each run takes 1–4 hours on the available hardware.
+- Few runs per LLM condition (5 for the full system and the no-analyst ablation, 3 for the others) because each
+  run takes 20 minutes to several hours on the available hardware. The 95% intervals use a normal
+  approximation; t-based intervals would be wider.
 - Shorter sessions (6 rounds) disadvantage every condition; all comparisons in 3.4 use the same length.
 - The rule-based budget constraint prevents losses, so efficiency partly reflects the mechanism, not the
   agents. The clip rate reports how often it intervened.
+- Two market sizes only (6 and 10 traders); the claim that the analyst helps more in larger markets needs a
+  third, larger market to confirm.
+- The rule-based analyst was used for all reported runs; the LLM analyst variant is implemented but untested.
+
+## 4. Lessons and experience
+
+**1. Coordination can make things worse before it makes them better.** Our first full run (v0) was *less*
+efficient than random traders (0.817 vs 0.889 at 10 rounds per period). The cause was the coordination layer
+itself: many traders posted a belief of 0, the analyst averaged these in and broadcast estimates of 54–69 for
+a market whose equilibrium is 100, and by the third period every agent anchored on a confident but wrong
+consensus of 115. Only 6 of the 11 efficient trades happened (period efficiency 0.57). Adding a channel for
+agents to share information also adds a channel for errors to spread. A coordinator needs input validation
+and needs to tell agents how uncertain it is.
+
+**2. Small, targeted fixes to the prompt and protocol mattered a lot.** We could not use a larger model,
+so we fixed the failures one at a time: filter out-of-range beliefs, show agents the profit arithmetic of
+accepting the current quote ("95 − 60 = 35, a profit"), and say that the analyst "may be wrong". Efficiency on
+the same seed went from 0.817 to 0.986 (Section 3.5). The lesson for us was to read the agents' reasoning, not just
+the metrics: the zero-profit orders and the herding were obvious in the logs long before we had a metric for them.
+
+**3. Improvements can move the problem rather than solve it.** The fixes made agents more rational *and* more
+dependent on the analyst. Prices then converged tightly, but to 88–90 instead of 100, and buyers took 62% of
+the surplus instead of 48%. The analyst's estimate became self-fulfilling: the market agreed on *a* price, not
+*the* price. That is why we report price accuracy, convergence and the surplus split alongside efficiency
+(TA recommendation 3): efficiency alone would have hidden this.
+
+**4. Don't tell a story from one seed, in either direction.** With seed 0 only, the analyst looked useless
+(0.922 with it vs 0.917 without). With three seeds it looked like each coordination layer added efficiency
+step by step. With five seeds the analyst effect became clear (0.946 vs 0.861, p ≈ 0.02), while the "step by
+step" story turned out to be wrong: sharing beliefs without an analyst (0.861) is no better than no
+communication (0.865). We rewrote our conclusions twice. Running more seeds was the single most useful thing
+we did for the evaluation, and the per-seed numbers are in the report so readers can judge the spread themselves.
+
+**5. A result in one market may not hold in another.** Following the TA's suggestion to start with a small
+pilot, we ran a 6-trader market. LLM traders still beat random ones there (0.96 vs 0.82), but the analyst made
+no difference. Without the pilot we would have claimed the analyst helps in general; the honest claim is that
+it helped when there was more scattered information to combine.
+
+**6. Safety rails hide poor reasoning.** The budget constraint clips any order that would lose money. Without
+it, agents with the analyst would have made a loss-making order 13% of the time (vs 5% without). Part of the
+analyst's benefit therefore depends on the mechanism stopping agents from following it too far. We log every
+clipped order so this is visible rather than hidden.
+
+**7. A single LLM with all the information is not automatically better.** We expected the centralized planner
+to be an upper bound. Instead it picked 115 in 13 of 15 periods and wrote out surplus sums that were wrong.
+Aggregating 30 private numbers into one price is exactly the step a small model gets wrong, and the market
+does it implicitly through trading.
+
+**8. Engineering lessons.** (a) No API budget meant running a 3B model locally on an 8 GB laptop. Runs took
+from 10 minutes to 6.5 hours depending on free memory and whether the laptop was plugged in; 8 parallel model
+calls were *slower* than sequential ones because memory was the bottleneck. (b) A strict output-length cap cut
+off 23% of answers mid-JSON; a lenient parser that closes a cut-off final string fixed this without losing
+any decisions. (c) A request cache, logged reasoning for every order and a free mock backend for tests made
+every run reproducible and every figure regenerable from `results/` with one command. (d) Building the replay
+and live dashboard early made failures easy to see and gave us a demo that does not depend on the network.
+
+## 5. Conclusion and future work
+
+A population of small LLM agents, each knowing only its own value or cost, captured 94.6% of the possible
+gains from trade in our main market, well above random traders (77.3%) and at least as well as a single LLM
+given all the private information (92.6%) (RQ1, RQ4). The analyst agent, which aggregates conflicting price
+estimates without seeing anyone's private information, was the coordination mechanism that mattered in the
+10-trader market; it did not matter in a 6-trader pilot (RQ2). The agents were better at deciding *who* should
+trade than at finding *the* price: no condition reliably settled within 10% of P\* within six rounds, and a
+strong consensus could pull prices to the wrong level (RQ3).
+
+Limitations are summarized in 3.8: one small model, 3–5 runs per LLM condition, two market sizes, and a budget
+constraint that protects agents from their own mistakes. Natural next steps are (1) a third, larger market to
+test whether the analyst's benefit grows with market size, (2) a stronger model to see whether the
+self-fulfilling consensus persists, (3) an analyst that weights traders by their track record instead of a
+plain median, and (4) removing the budget constraint to measure how much the agents rely on it.
+
+## References
+
+- Gode, D. K., & Sunder, S. (1993). Allocative efficiency of markets with zero-intelligence traders: Market as a
+  partial substitute for individual rationality. *Journal of Political Economy*, 101(1), 119–137.
+- Smith, V. L. (1962). An experimental study of competitive market behavior. *Journal of Political Economy*,
+  70(2), 111–137.
+- Hayek, F. A. (1945). The use of knowledge in society. *American Economic Review*, 35(4), 519–530.
+- Qwen Team (2024). Qwen2.5 technical report. arXiv:2412.15115.
+
+## Appendix A. Reproducing the results
+
+All numbers and figures are regenerated from the logged runs in `results/`:
+
+    python -m analysis.metrics results        # results/summary.csv (mean ± 95% CI per condition)
+    python -m analysis.plots                  # every figure in report/figures/
+    bash experiments/run_laptop_plan.sh       # main comparison (seeds 0-2), restartable
+    bash experiments/run_more_seeds.sh        # seeds 3-4 for the full system and no-analyst ablation
+    bash experiments/run_pilot.sh             # 6-trader pilot market
+    pytest -q                                 # 26 tests, no model needed
+
+Each run directory holds the config, market, every order with the agent's reasoning, trades, bus messages,
+analyst history, LLM usage and metrics.

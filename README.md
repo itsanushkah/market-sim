@@ -5,11 +5,13 @@ double auction. A separate **analyst agent** collects their disagreeing price es
 consensus. We measure how close this decentralized multi-agent system gets to the competitive equilibrium,
 which we compute exactly, and compare it with random traders and with ablations of each coordination mechanism.
 
-CMPSC 448 final project. All results so far come from a free local model (qwen2.5:3b via Ollama) on a laptop.
+CMPSC 448 final project. All results come from a free local model (qwen2.5:3b via Ollama) on a laptop.
+**Final report:** [`report/report.pdf`](report/report.pdf) (source `report/report.md`; rebuild with
+`python report/build_pdf.py`).
 
 ![System architecture](report/figures/architecture.png)
 
-## Key findings so far
+## Key findings
 
 Main comparison: 3 periods × 6 rounds, symmetric market, qwen2.5:3b, 5 seeds for the full system and the
 no-analyst ablation, 3 for no communication, 5 for the planner and 10 for ZI-C. ± is a 95% interval over seeds.
@@ -146,10 +148,10 @@ analysis/      metrics, plots, diagram, reasoning excerpts, metric recompute
 dashboard/     Streamlit replay of logged runs
 tests/         order book, equilibrium, end-to-end runs, LLM client
 results/       <experiment>/seed_<k>/: config, market, orders (with reasoning), trades, messages, metrics
-report/        draft, outline, lessons log, figures, excerpts
+report/        report.md + report.pdf (final report), build_pdf.py, outline, lessons log, figures, excerpts
 ```
 
 ## Limitations
 
 A 3B-parameter local model, 3 to 5 seeds per LLM condition (each run takes 10 min to 6 h on a laptop), and a budget
-constraint that keeps agents from losing money even when they try to. See `report/draft.md` §3.7.
+constraint that keeps agents from losing money even when they try to. See the report, §3.8.

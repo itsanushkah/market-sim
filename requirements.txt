@@ -4,3 +4,4 @@ pyyaml>=6.0
 matplotlib>=3.8
 pytest>=8.0
 streamlit>=1.38   # dashboard only
+markdown>=3.5

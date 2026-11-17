@@ -11,6 +11,8 @@ Produces:
   efficiency_by_period.png          mean efficiency per period for each condition (learning across periods)
   surplus_split.png                 buyers' share of surplus vs the competitive-equilibrium share
   prompt_fix_before_after.png       v0 vs v1 prompts: price paths and per-period efficiency
+  main_results.png                  report figure: main comparison and pilot, readable labels
+  convergence_by_round.png          mean |price - P*| per round within a period
 Mock-backend runs are skipped.
 """
 from __future__ import annotations
@@ -29,6 +31,25 @@ from market.equilibrium import compute_equilibrium, demand_supply
 
 plt.rcParams.update({"figure.dpi": 150, "axes.spines.top": False, "axes.spines.right": False, "font.size": 9})
 C_MAIN, C_BAND, C_BASE = "#2a6fdb", "#e8eef9", "#8a8a8a"
+
+# Readable names for figures in the report (experiment name without the session-length suffix).
+LABELS = {
+    "llm_full_qwen3b": "LLM full (analyst + memory)",
+    "abl_no_analyst_qwen3b": "LLM, no analyst",
+    "abl_no_comms_qwen3b": "LLM, no communication",
+    "baseline_centralized_llm_qwen3b": "Centralized LLM planner",
+    "baseline_zi_c": "ZI-C (random, budget-constrained)",
+    "baseline_zi_u": "ZI-U (random, unconstrained)",
+    "baseline_oracle": "Oracle",
+    "pilot_llm_full_qwen3b": "LLM full (analyst + memory)",
+    "pilot_no_analyst_qwen3b": "LLM, no analyst",
+    "pilot_zi_c": "ZI-C (random, budget-constrained)",
+}
+
+
+def label(name: str, suffix: str = "_r6") -> str:
+    base = name.removesuffix(suffix)
+    return LABELS.get(base, base)
 
 
 def load_market_json(path: Path) -> MarketConfig:
@@ -115,7 +136,7 @@ def plot_efficiency_by_period(results_dir: Path, out: Path, suffix: str = "_r6")
         ys = [sum(r["per_period"][p]["efficiency"] for r in rs) / len(rs) for p in range(n)]
         baseline = name.startswith("baseline")
         ax.plot(range(1, n + 1), ys, marker="o", ms=3, ls="--" if baseline else "-",
-                color=C_BASE if baseline else next(palette), label=f"{name.removesuffix(suffix)} (n={len(rs)})")
+                color=C_BASE if baseline else next(palette), label=f"{label(name, suffix)} (n={len(rs)})")
     ax.set(xlabel="period", ylabel="allocative efficiency", ylim=(0, 1.05),
            title="Efficiency by period (6 rounds/period, symmetric market)")
     ax.set_xticks([1, 2, 3])
@@ -151,7 +172,7 @@ def plot_convergence_by_round(results_dir: Path, out: Path, suffix: str = "_r6",
         baseline = exp_dir.name.startswith("baseline")
         ax.plot([r + 1 for r in rounds], [sum(by_round[r]) / len(by_round[r]) for r in rounds], marker="o", ms=3,
                 ls="--" if baseline else "-", color=C_BASE if baseline and "zi_c" in exp_dir.name else next(palette),
-                label=f"{exp_dir.name.removesuffix(suffix)} (n={n})")
+                label=f"{label(exp_dir.name, suffix)} (n={n})")
         drawn += 1
     if drawn:
         ax.set(xlabel="round within period", ylabel="mean |price - P*|", ylim=(0, None),
@@ -195,17 +216,45 @@ def plot_before_after(results_dir: Path, before: str, after: str, out: Path, see
             ax.plot(range(x0, x0 + len(pt)), pt, "o-", ms=2.5, lw=0.9, color=C_MAIN)
             x0 += len(pt)
             ax.axvline(x0 - 0.5, color=C_BASE, lw=0.5, ls=":")
-        ax.set(title=f"{label}: efficiency {m['efficiency']:.2f}", xlabel="trade #", ylabel="price")
+        nice = "Before fixes (v0)" if label == before else "After fixes (v1)"
+        ax.set(title=f"{nice}: efficiency {m['efficiency']:.2f}", xlabel="trade # (dotted = new period; dashed = P*)",
+               ylabel="price")
     ax = axes[2]
     w = 0.38
     for i, (label, run) in enumerate(runs.items()):
         m = json.loads((run / "metrics.json").read_text())
         ys = [p["efficiency"] for p in m["per_period"]]
         ax.bar([x + (i - 0.5) * w for x in range(1, len(ys) + 1)], ys, w,
-               color=[C_BASE, C_MAIN][i], label=label.split("_")[-1])
+               color=[C_BASE, C_MAIN][i], label=["before (v0)", "after (v1)"][i])
     ax.set(xlabel="period", ylabel="efficiency", ylim=(0, 1.05), title="per period")
     ax.set_xticks([1, 2, 3]); ax.legend(frameon=False, fontsize=7)
     fig.tight_layout(); fig.savefig(out); plt.close(fig)
+
+
+MAIN_CONDITIONS = ["baseline_zi_c_r6", "abl_no_comms_qwen3b_r6", "abl_no_analyst_qwen3b_r6",
+                   "baseline_centralized_llm_qwen3b", "llm_full_qwen3b_r6"]
+PILOT_CONDITIONS = ["pilot_zi_c_r6", "pilot_no_analyst_qwen3b_r6", "pilot_llm_full_qwen3b_r6"]
+
+
+def plot_main_results(rows: list[dict], out: Path) -> None:
+    """Report Figure: efficiency ± 95% CI for the main 10-trader comparison and the 6-trader pilot."""
+    by = {r["experiment"]: r for r in rows}
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.4), gridspec_kw={"width_ratios": [5, 3]})
+    for ax, names, title in ((axes[0], MAIN_CONDITIONS, "Main market (10 traders, P* = 100)"),
+                             (axes[1], PILOT_CONDITIONS, "Pilot market (6 traders)")):
+        names = [n for n in names if n in by]
+        ys = [float(by[n]["efficiency"]) for n in names]
+        es = [float(by[n]["efficiency_ci95"]) for n in names]
+        cols = [C_BASE if ("zi_c" in n or "centralized" in n) else C_MAIN for n in names]
+        cols = ["#3a9a5b" if "llm_full" in n else c for n, c in zip(names, cols)]
+        ax.barh(range(len(names)), ys, xerr=es, color=cols, capsize=3)
+        ax.set_yticks(range(len(names)))
+        ax.set_yticklabels([f"{label(n)}  (n={by[n]['n_seeds']})" for n in names], fontsize=8)
+        for i, y in enumerate(ys):
+            ax.text(0.02, i, f"{y:.3f}", va="center", color="white", fontsize=8, fontweight="bold")
+        ax.axvline(1.0, color="black", lw=0.6, ls=":")
+        ax.set(xlim=(0, 1.05), xlabel="efficiency (mean ± 95% CI over seeds)", title=title)
+    fig.tight_layout(); fig.savefig(out, bbox_inches="tight"); plt.close(fig)
 
 
 def main():
@@ -236,6 +285,7 @@ def main():
         plot_bars(rows, "price_rmsd", "price RMSD from P*", out / "rmsd_by_condition.png")
         plot_cost_vs_eff(rows, out / "cost_vs_efficiency.png")
         plot_surplus_split(rows, out / "surplus_split.png")
+        plot_main_results(rows, out / "main_results.png")
     plot_efficiency_by_period(res, out / "efficiency_by_period.png")
     plot_convergence_by_round(res, out / "convergence_by_round.png")
     plot_before_after(res, "llm_full_qwen3b_v0", "llm_full_qwen3b_v1", out / "prompt_fix_before_after.png")
